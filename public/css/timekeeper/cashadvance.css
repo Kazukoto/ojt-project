@@ -1,0 +1,809 @@
+/* ================= HEADER ================= */
+.flex-box {
+    display: flex;
+    align-items: center;
+    margin-right: 0;
+}
+
+/* Push page content below fixed header */
+.main-content {
+    margin-left: 200px;
+    padding: 30px;
+    padding-top: 70px;
+}
+
+/* ===== RIGHT SIDE HEADER ===== */
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.header-icon {
+    font-size: 20px;
+    cursor: pointer;
+}
+
+
+/* ================= TABLE ================= */
+
+.table-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    white-space: nowrap;
+    padding: 12px;
+    background: #f8f9fa;
+}
+
+.table tbody td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            display: flex;
+        }
+
+        hr{
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .table-container {
+            width: 100%;
+            content: "center";
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        td {
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+            width: 100%;
+        }
+
+        .search-box, .filter-box {
+            max-width: 1135px;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .filter-box {
+            width: 24%;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            }
+
+        .search-box {
+            width: 75%;
+            padding: 10px 15px;
+            }
+
+
+        /* Sidebar */
+        
+
+.sidenav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200px;
+    min-height: 100vh;
+    padding: 20px 0;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+}
+
+.sidenav .logo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 30px;
+    border-radius: 50%;
+    background: #fff;
+    color: #667eea;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidenav a {
+    display: block;
+    padding: 15px 20px;
+    font-size: 14px;
+    color: #fff;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.sidenav a:hover,
+.sidenav a.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+        /* Main Content */
+        .main-content {
+            margin-left: 200px;
+            flex: 1;
+        }
+        .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+    .pagination {
+    margin-top: 20px;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    margin-bottom: 10px;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.pagination a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination .active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+
+.pagination .disabled {
+    color: #999;
+    pointer-events: none;
+    background: #f5f5f5;
+}
+
+/* ===== Modal Box ===== */
+.modal-box {
+    background: #ffffff;
+    width: 100%;
+    max-width: 1100px;
+    border-radius: 14px;
+    padding: 0px 15px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    overflow-y: auto;
+    animation: modalPop .2s ease-out;
+}
+
+.modal-box h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.modal-box p {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.modal-close {
+    position: center;
+    margin-top: 20px;
+    right: 325px;
+    top:225px;
+    font-size: 22px;
+    border: none;
+    background: none;   
+    cursor: pointer;
+    color: #666;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    color: #000;
+}
+
+@keyframes modalPop {
+    from { transform: scale(.95); opacity: .6; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+button{
+    padding: 10px 20px;
+    background-color: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+}
+
+select{
+    padding: 10px 20px;
+    background-color: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+
+/* Scroll on small screens */
+@media (max-width: 768px) {
+    .table-container {
+        overflow-x: auto;
+    }
+}
+
+/* ================= MODAL ================= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+}
+
+.modal-box {
+    background: #ffffff;
+    width: 95%;
+    max-width: 500px;
+    border-radius: 16px;
+    padding: 25px 28px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+    animation: modalFade .25s ease;
+}
+
+/* Modal Header */
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    font-size: 20px;
+    color: #333;
+    margin: 0;
+}
+
+/* Close Button */
+
+/* Close Button inside Modal */
+.modal-close {
+    position: absolute;       /* Fix inside the modal */
+    top: 15px;                /* Distance from top of modal */
+    right: 15px;              /* Distance from right of modal */
+    color: #333;               /* Button text color */
+    border: none;              /* Remove border */
+    border-radius: 50%;        /* Make it circular */
+    width: 30px;               /* Width and height */
+    height: 30px;
+    font-size: 18px;           /* X symbol size */
+    cursor: pointer;           /* Pointer on hover */
+    display: flex;             /* Center the X */
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+/*Header css*/
+/* Header - positioned to start after sidebar */
+.header-top {
+    position: fixed;
+    top: 0;
+    left: 200px; /* sidebar width */
+    right: 0;
+    height: 60px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    z-index: 100;
+}
+
+.header-top h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+/* Form Layout */
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+}
+
+.modal-form select,
+.modal-form input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: .2s;
+}
+
+.modal-form select:focus,
+.modal-form input:focus {
+    border-color: #667eea;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+}
+
+/* Footer */
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+/* Save Button */
+
+.save-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.save-btn:hover {
+    opacity: .9;
+    transform: translateY(-1px);
+}
+
+/* Add button fix */
+
+.add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Animation */
+
+@keyframes modalFade {
+    from {
+        opacity: 0;
+        transform: translateY(-15px) scale(.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ===== CASH ADVANCE MODAL STYLES ===== */
+#cashAdvanceModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+    overflow-y: auto;
+    backdrop-filter: blur(4px);
+}
+
+#cashAdvanceModal .modal-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    animation: modalFade 0.25s ease;
+    position: relative;
+}
+
+/* Modal Header */
+#cashAdvanceModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#cashAdvanceModal .modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Divider */
+#cashAdvanceModal hr {
+    border: none;
+    border-top: 1px solid #d1d5db;
+    margin: 0 0 25px 0;
+    padding: 0;
+}
+
+/* Close Button */
+#cashAdvanceModal .modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 0;
+    margin: 0;
+}
+
+
+/* Form Table Styles */
+#cashAdvanceModal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+}
+
+#cashAdvanceModal td {
+    padding: 15px 0;
+    vertical-align: middle;
+    font-size: 14px;
+    color: #333;
+}
+
+#cashAdvanceModal td:first-child {
+    width: 90px;
+    padding-right: 15px;
+}
+
+#cashAdvanceModal strong {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+/* Inputs and Selects */
+#cashAdvanceModal input,
+#cashAdvanceModal select,
+#cashAdvanceModal textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+#cashAdvanceModal textarea {
+    resize: vertical;
+    min-height: 75px;
+    font-family: inherit;
+}
+
+#cashAdvanceModal input:focus,
+#cashAdvanceModal select:focus,
+#cashAdvanceModal textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+#cashAdvanceModal input::placeholder,
+#cashAdvanceModal textarea::placeholder {
+    color: #999;
+}
+
+/* Button Container */
+#cashAdvanceModal .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+/* Save Button */
+#cashAdvanceModal .save-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#cashAdvanceModal .save-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#cashAdvanceModal .save-btn:active {
+    transform: translateY(0);
+}
+
+#editCashAdvanceModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+    overflow-y: auto;
+    backdrop-filter: blur(4px);
+}
+
+#editCashAdvanceModal .modal-box {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    animation: modalFade 0.25s ease;
+    position: relative;
+}
+
+/* Modal Header */
+#editCashAdvanceModal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#editCashAdvanceModal .modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* Divider */
+#editCashAdvanceModal hr {
+    border: none;
+    border-top: 1px solid #d1d5db;
+    margin: 0 0 25px 0;
+    padding: 0;
+}
+
+/* Close Button */
+#editCashAdvanceModal .modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    color: rgb(0, 0, 0);
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.2s;
+    padding: 0;
+    margin: 0;
+}
+
+/* Form Table Styles */
+#editCashAdvanceModal table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+}
+
+#editCashAdvanceModal td {
+    padding: 15px 0;
+    vertical-align: middle;
+    font-size: 14px;
+    color: #333;
+}
+
+#editCashAdvanceModal td:first-child {
+    width: 90px;
+    padding-right: 15px;
+}
+
+#editCashAdvanceModal strong {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+/* Inputs and Selects */
+#editCashAdvanceModal input,
+#editCashAdvanceModal select,
+#editCashAdvanceModal textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+#editCashAdvanceModal textarea {
+    resize: vertical;
+    min-height: 75px;
+    font-family: inherit;
+}
+
+#editCashAdvanceModal input:focus,
+#editCashAdvanceModal select:focus,
+#editCashAdvanceModal textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.15);
+}
+
+#editCashAdvanceModal input::placeholder,
+#editCashAdvanceModal textarea::placeholder {
+    color: #999;
+}
+
+/* Button Container */
+#editCashAdvanceModal .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+/* Save Button */
+#editCashAdvanceModal .save-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#editCashAdvanceModal .save-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#editCashAdvanceModal .save-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    #cashAdvanceModal .modal-box {
+        padding: 20px;
+    }
+
+    #cashAdvanceModal td {
+        padding: 12px 0;
+    }
+
+    #cashAdvanceModal td:first-child {
+        width: 80px;
+        padding-right: 10px;
+    }
+
+    #cashAdvanceModal .modal-buttons {
+        flex-direction: column;
+    }
+
+    #cashAdvanceModal .save-btn {
+        width: 100%;
+    }
+}   
+
+.sidenav-logout {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+}
+
+.sidenav-logout .logout-btn {
+    width: 90%;
+    padding: 10px 0;
+    background: #ef4444; /* red for logout */
+    border: none;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.sidenav-logout .logout-btn:hover {
+    background: #dc2626;
+}

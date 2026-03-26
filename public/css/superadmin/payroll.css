@@ -1,0 +1,649 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    display: flex;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.main-content {
+    margin-left: 200px;
+    flex: 1;
+    padding: 30px;
+}
+
+.page-header {
+    margin-bottom: 16px;
+}
+
+.page-header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.date-range-bar {
+    background: #f0f9ff;
+    border-left: 4px solid #6c63ff;
+    border-radius: 6px;
+    padding: 9px 16px;
+    font-size: 13px;
+    color: #4338ca;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+.controls-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 220px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #6c63ff;
+}
+
+.filter-select {
+    padding: 8px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fff;
+    outline: none;
+    cursor: pointer;
+}
+
+.filter-select:focus {
+    border-color: #6c63ff;
+}
+
+.date-label {
+    font-size: 13px;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.date-input {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    width: 145px;
+    outline: none;
+}
+
+.date-input:focus {
+    border-color: #6c63ff;
+}
+
+.filter-btn {
+    padding: 8px 18px;
+    background: #6c63ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.filter-btn:hover {
+    background: #5a52d5;
+}
+
+/* ── Export Button ── */
+.export-btn {
+    padding: 8px 18px;
+    background: #16a34a;
+    color: #fff;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity .2s;
+}
+
+.export-btn:hover {
+    opacity: .85;
+}
+
+/* Export Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 14px;
+    padding: 28px 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+    animation: modalPop .2s ease-out;
+}
+
+@keyframes modalPop {
+    from {
+        transform: scale(.95);
+        opacity: .6
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1
+    }
+}
+
+.modal-box h2 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.modal-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.modal-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.modal-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+}
+
+.modal-input:focus {
+    border-color: #6c63ff;
+}
+
+.modal-select {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    background: #fff;
+    cursor: pointer;
+}
+
+.modal-select:focus {
+    border-color: #6c63ff;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.btn-cancel-modal {
+    padding: 8px 18px;
+    background: #fff;
+    color: #6b7280;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.btn-export-modal {
+    padding: 8px 18px;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.btn-export-modal:hover {
+    background: #15803d;
+}
+
+.table-wrapper {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+thead {
+    background: #6c63ff;
+    color: #fff;
+}
+
+th {
+    padding: 13px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #444;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fff;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background: #f0efff;
+    cursor: pointer;
+}
+
+.no-records {
+    text-align: center;
+    padding: 30px;
+    color: #999;
+    font-size: 14px;
+}
+
+.pagination {
+    margin-top: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+    background: #fff;
+    border-top: 1px solid #f0f0f0;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.pagination a:hover {
+    background: #6c63ff;
+    color: white;
+    border-color: #6c63ff;
+}
+
+.pagination .active {
+    background: #6c63ff;
+    color: white;
+    font-weight: bold;
+    border-color: #6c63ff;
+}
+
+.pagination .disabled {
+    color: #999;
+    pointer-events: none;
+    background: #f5f5f5;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 700px;
+    border-radius: 14px;
+    padding: 28px 32px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    max-height: 90vh;
+    animation: modalPop .2s ease-out;
+}
+
+@keyframes modalPop {
+    from {
+        transform: scale(.95);
+        opacity: .6;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-box h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.modal-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6c63ff;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.modal-box table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.modal-box thead {
+    background: transparent;
+}
+
+.modal-box th {
+    display: none;
+}
+
+.modal-box td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    background: transparent;
+}
+
+.modal-box td:first-child {
+    font-weight: 600;
+    color: #555;
+    width: 220px;
+}
+
+.modal-box tr:last-child td {
+    border-bottom: none;
+}
+
+.gross-pay-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.close-btn {
+    padding: 8px 20px;
+    background: #6c63ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.close-btn:hover {
+    background: #5a52d5;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 4px 0 8px;
+}
+
+/* ================= ALERTS ================= */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    animation: alertSlideIn 0.3s ease;
+    position: relative;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    color: #166534;
+}
+
+.alert-success::before {
+    content: '✅';
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.alert-error {
+    background: #fff1f2;
+    border: 1.5px solid #fca5a5;
+    color: #991b1b;
+}
+
+.alert-error::before {
+    content: '❌';
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.alert ul {
+    margin: 0;
+    padding-left: 16px;
+}
+
+.alert ul li {
+    margin-top: 2px;
+}
+
+/* ================= STATUS PAID ================= */
+.status-paid {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ================= FADE-IN ANIMATIONS ================= */
+
+/* Page elements fade up on load */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(.95) translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Table card fades in */
+.table-container {
+    animation: fadeInUp 0.4s ease both;
+}
+
+/* Filter form row fades in slightly before table */
+.filter-form-row {
+    animation: fadeInUp 0.35s ease both;
+}
+
+/* Each table row fades in staggered */
+tbody tr {
+    animation: fadeIn 0.3s ease both;
+}
+
+tbody tr:nth-child(1) {
+    animation-delay: .03s;
+}
+
+tbody tr:nth-child(2) {
+    animation-delay: .06s;
+}
+
+tbody tr:nth-child(3) {
+    animation-delay: .09s;
+}
+
+tbody tr:nth-child(4) {
+    animation-delay: .12s;
+}
+
+tbody tr:nth-child(5) {
+    animation-delay: .15s;
+}
+
+tbody tr:nth-child(6) {
+    animation-delay: .18s;
+}
+
+tbody tr:nth-child(7) {
+    animation-delay: .21s;
+}
+
+tbody tr:nth-child(8) {
+    animation-delay: .24s;
+}
+
+tbody tr:nth-child(9) {
+    animation-delay: .27s;
+}
+
+tbody tr:nth-child(10) {
+    animation-delay: .30s;
+}
+
+tbody tr:nth-child(11) {
+    animation-delay: .33s;
+}
+
+tbody tr:nth-child(12) {
+    animation-delay: .36s;
+}
+
+tbody tr:nth-child(13) {
+    animation-delay: .39s;
+}
+
+tbody tr:nth-child(14) {
+    animation-delay: .42s;
+}
+
+tbody tr:nth-child(15) {
+    animation-delay: .45s;
+}
+
+tbody tr:nth-child(16) {
+    animation-delay: .48s;
+}
+
+tbody tr:nth-child(17) {
+    animation-delay: .51s;
+}
+
+tbody tr:nth-child(18) {
+    animation-delay: .54s;
+}
+/* Alert messages fade in from top */
+.alert {
+    animation: fadeInUp 0.3s ease both;
+}
+
+/* Pagination fades in */
+.pagination {
+    animation: fadeInUp 0.4s ease .2s both;
+}
+
+/* Modal overlay fades in, box slides in */
+.modal-overlay {
+    animation: fadeIn 0.2s ease both;
+}
+
+.modal-overlay .modal-box {
+    animation: modalSlideIn 0.25s ease both;
+}

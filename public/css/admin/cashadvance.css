@@ -1,0 +1,424 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f2f8;
+    display: flex;
+    min-height: 100vh;
+}
+
+/* ================= LAYOUT ================= */
+.main-content {
+    margin-left: 200px;
+    padding: 30px;
+    padding-top: 40px;
+    flex: 1;
+}
+
+/* ================= PAGE TITLE ================= */
+.flex-box h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ================= FILTER FORM ROW ================= */
+.filter-form-row {
+    margin-bottom: 20px;
+}
+
+.search-box,
+.filter-box {
+    padding: 10px 15px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+    color: #374151;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-box:focus,
+.filter-box:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+}
+
+.search-box {
+    width: 75%;
+}
+
+.filter-box {
+    width: 24%;
+}
+
+/* ================= ADD BUTTON ================= */
+.add-btn {
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #6366f1, #7c3aed);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.add-btn:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+}
+
+/* ================= TABLE CARD ================= */
+.table-container {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Header row — purple like the image */
+thead tr {
+    background: linear-gradient(90deg, #6366f1, #7c3aed);
+}
+
+thead th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 13px 16px;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background: #f8f7ff;
+}
+
+/* ================= STATUS BADGES ================= */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.status-pending {
+    background: #fef9c3;
+    color: #854d0e;
+}
+
+.status-approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* ================= ACTION BUTTONS ================= */
+.edit-btn,
+.delete-btn {
+    padding: 7px 14px;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-right: 6px;
+}
+
+.edit-btn {
+    background: #6366f1;
+    color: #fff;
+}
+
+.edit-btn:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(99,102,241,0.3);
+}
+
+.delete-btn {
+    background: #ef4444;
+    color: #fff;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(239,68,68,0.3);
+}
+
+/* ================= PAGINATION ================= */
+.pagination {
+    margin-top: 24px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.pagination a,
+.pagination span {
+    padding: 8px 13px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 7px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 14px;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.pagination a:hover {
+    background: #6366f1;
+    color: #fff;
+    border-color: #6366f1;
+}
+
+.pagination .active {
+    background: linear-gradient(135deg, #6366f1, #7c3aed);
+    color: #fff;
+    border-color: #6366f1;
+    font-weight: 700;
+}
+
+.pagination .disabled {
+    color: #bbb;
+    background: #f5f5f5;
+    border-color: #e2e8f0;
+    pointer-events: none;
+}
+
+/* ================= MODAL OVERLAY ================= */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 10, 40, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* ================= MODAL BOX ================= */
+.modal-box {
+    background: #fff;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 16px;
+    padding: 30px 28px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.22);
+    position: relative;
+    animation: modalFade 0.22s ease;
+}
+
+.modal-box h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 12px 0 20px;
+}
+
+/* ================= MODAL CLOSE ================= */
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+    padding: 0;
+    margin: 0;
+}
+
+.modal-close:hover {
+    background: #e2e8f0;
+    color: #111;
+}
+
+/* ================= MODAL FORM TABLE ================= */
+.modal-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.modal-box td {
+    padding: 10px 0;
+    vertical-align: middle;
+    font-size: 14px;
+    color: #374151;
+    border-bottom: none;
+}
+
+.modal-box td:first-child {
+    width: 95px;
+    padding-right: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.modal-box strong {
+    display: block;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+/* ================= MODAL INPUTS ================= */
+.modal-box input,
+.modal-box select,
+.modal-box textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #f8fafc;
+    color: #1e293b;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    margin-bottom: 0;
+}
+
+.modal-box textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-box input:focus,
+.modal-box select:focus,
+.modal-box textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    background: #fff;
+}
+
+.modal-box input::placeholder,
+.modal-box textarea::placeholder {
+    color: #aab;
+}
+
+/* ================= SAVE BUTTON ================= */
+.save-btn {
+    padding: 10px 26px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #6366f1, #7c3aed);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.save-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(99,102,241,0.4);
+}
+
+/* ================= SIDEBAR OVERRIDE ================= */
+.sidenav {
+    width: 200px;
+    min-height: 100vh;
+    position: fixed;
+}
+
+.sidenav a {
+    display: block;
+    padding: 15px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.sidenav a:hover,
+.sidenav a.active {
+    background: rgba(255,255,255,0.18);
+}
+
+/* ================= ANIMATION ================= */
+@keyframes modalFade {
+    from { opacity: 0; transform: translateY(-14px) scale(.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    .search-box { width: 100%; }
+    .filter-box { width: 100%; }
+
+    .table-container {
+        overflow-x: auto;
+    }
+}

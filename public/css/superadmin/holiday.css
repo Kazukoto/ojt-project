@@ -1,0 +1,483 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background: #f4f6f9;
+}
+
+.page-wrapper {
+    margin-left: 200px;
+    padding: 24px 20px;
+    min-height: 100vh;
+}
+
+.card-header {
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+}
+
+.card-header .form-select {
+    max-width: 150px;
+    font-size: 13px;
+}
+
+.add-btn {
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s;
+}
+
+.add-btn:hover {
+    opacity: .88;
+}
+
+#calendar {
+    min-height: 600px;
+}
+
+.calendar-col,
+.list-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-col .card,
+.list-col .card {
+    flex: 1;
+}
+
+.holiday-list-wrapper {
+    height: 680px;
+    overflow-y: auto;
+}
+
+.holiday-item {
+    font-size: 13px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    transition: background .15s;
+}
+
+.holiday-item:hover {
+    background: #f8f9fa;
+}
+
+.inactive-holiday {
+    opacity: .45;
+}
+
+.badge-regular_holiday {
+    background: #dc3545;
+}
+
+.badge-special_non_working {
+    background: #fd7e14;
+}
+
+.badge-special_working {
+    background: #198754;
+}
+
+.legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+.legend-item {
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+/* ===== MODAL ===== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .55);
+    z-index: 1050;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 660px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+    animation: modalIn .2s ease;
+}
+
+.modal-box-sm {
+    max-width: 380px;
+}
+
+.modal-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-radius: 12px 12px 0 0;
+    background: #1f2937;
+    color: #fff;
+}
+
+.modal-hdr.danger {
+    background: #dc3545;
+}
+
+.modal-hdr h5,
+.modal-hdr h6 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    opacity: .8;
+}
+
+.modal-close-btn:hover {
+    opacity: 1;
+}
+
+.modal-bdy {
+    padding: 28px 28px 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.modal-ftr {
+    padding: 14px 28px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row .fgroup {
+    flex: 1;
+}
+
+.fgroup {
+    margin-bottom: 18px;
+}
+
+.fgroup label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.fgroup label .req {
+    color: #dc3545;
+}
+
+.fgroup input[type="text"],
+.fgroup input[type="number"],
+.fgroup select,
+.fgroup textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #1f2937;
+    background: #fff;
+    transition: border .2s, box-shadow .2s;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.fgroup input:focus,
+.fgroup select:focus,
+.fgroup textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+}
+
+.fgroup textarea {
+    resize: vertical;
+}
+
+.input-suffix-wrap {
+    display: flex;
+    align-items: stretch;
+    border: 1.5px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border .2s, box-shadow .2s;
+}
+
+.input-suffix-wrap:focus-within {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+}
+
+.input-suffix-wrap input {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    flex: 1;
+}
+
+.input-suffix-wrap .suffix {
+    padding: 10px 13px;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 14px;
+    border-left: 1.5px solid #d1d5db;
+    display: flex;
+    align-items: center;
+}
+
+.rate-info-box {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #0369a1;
+    margin-bottom: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.rate-info-box strong {
+    color: #0c4a6e;
+}
+
+.form-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 5px;
+}
+
+.date-selects {
+    display: flex;
+    gap: 8px;
+}
+
+.date-selects select {
+    flex: 1;
+}
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #374151;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.toggle-row input[type="checkbox"] {
+    width: 38px;
+    height: 20px;
+    accent-color: #6366f1;
+    cursor: pointer;
+}
+
+.mbtn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity .2s, transform .1s;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.mbtn:hover {
+    opacity: .88;
+}
+
+.mbtn:active {
+    transform: scale(.97);
+}
+
+.mbtn-primary {
+    background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+    color: #fff;
+}
+
+.mbtn-secondary {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.mbtn-danger {
+    background: #dc3545;
+    color: #fff;
+}
+
+@media (max-width: 768px) {
+    .page-wrapper {
+        margin-left: 0;
+    }
+
+    .list-col {
+        margin-top: 16px;
+    }
+
+    .holiday-list-wrapper {
+        height: 400px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+
+/* ================= FADE-IN ANIMATIONS ================= */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(.95) translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Page wrapper content fades up */
+.page-wrapper>* {
+    animation: fadeInUp 0.35s ease both;
+}
+
+/* Calendar column fades up */
+.calendar-col {
+    animation: fadeInUp 0.38s ease 0.05s both;
+}
+
+/* Holiday list column fades up slightly after */
+.list-col {
+    animation: fadeInUp 0.38s ease 0.1s both;
+}
+
+/* Individual holiday list items stagger in */
+.holiday-item {
+    animation: fadeIn 0.3s ease both;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(1) {
+    animation-delay: .08s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(2) {
+    animation-delay: .12s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(3) {
+    animation-delay: .16s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(4) {
+    animation-delay: .20s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(5) {
+    animation-delay: .24s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(6) {
+    animation-delay: .28s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(7) {
+    animation-delay: .32s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(8) {
+    animation-delay: .36s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(9) {
+    animation-delay: .40s;
+}
+
+.holiday-list-wrapper .holiday-item:nth-child(10) {
+    animation-delay: .44s;
+}
+
+/* Modal overlay fades in, box slides in */
+.modal-overlay {
+    animation: fadeIn 0.2s ease both;
+}
+
+.modal-overlay .modal-box {
+    animation: modalSlideIn 0.25s ease both;
+}
