@@ -27,7 +27,7 @@ Route::get('/timekeeper/index',
     ->name('timekeeper.index');
 
 Route::get('/register', [RegisterUserController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterUserController::class, 'register'])->name('modal.store');
+Route::post('/register', [RegisterUserController::class, 'register'])->name('register.submit');
 
 /* =========================
    USERS
