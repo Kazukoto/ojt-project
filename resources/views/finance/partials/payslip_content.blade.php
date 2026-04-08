@@ -101,9 +101,9 @@
                 <td class="td-value2">{{ $hasRestDayOT ? '₱ ' . $payslipData['rest_day_ot_pay'] : '—' }}</td>
             </tr>
             <tr class="{{ ($hasRegHol || $hasSpecHol) ? 'row-holiday' : '' }}">
-                <td class="td-label">REGULAR HOLIDAY PAY (200%)</td>
+                <td class="td-label">REGULAR HOLIDAY PAY (x2.0)</td>
                 <td class="td-value">{{ $hasRegHol ? '₱ ' . $payslipData['reg_holiday_pay'] : '—' }}</td>
-                <td class="td-label2">SPECIAL HOLIDAY PAY (130%)</td>
+                <td class="td-label2">SPECIAL HOLIDAY PAY (x1.30)</td>
                 <td class="td-value2">{{ $hasSpecHol ? '₱ ' . $payslipData['spec_holiday_pay'] : '—' }}</td>
             </tr>
             <tr class="row-section-yellow">
@@ -113,7 +113,7 @@
             <tr>
                 <td class="td-label">SSS</td>
                 <td class="td-value">{{ $payslipData['sss'] != '0.00' ? '₱ ' . $payslipData['sss'] : '—' }}</td>
-                <td class="td-label2">NET PAY (GRAND TOTAL)</td>
+                <td class="td-label2">GROSS PAY (GRAND TOTAL)</td>
                 <td class="td-value2" style="font-weight:700;color:#166534;">₱ {{ $payslipData['grand_total'] }}</td>
             </tr>
             <tr>
@@ -136,7 +136,7 @@
                 <td class="td-value">{{ $payslipData['cash_advance'] != '0.00' ? '₱ ' . $payslipData['cash_advance'] : '—' }}</td>
             </tr>
             <tr class="row-gross">
-                <td colspan="2">GROSS PAY &nbsp;&nbsp; ₱ {{ $payslipData['gross_pay'] }}</td>
+                <td colspan="2">NET PAY &nbsp;&nbsp; ₱ {{ $payslipData['gross_pay'] }}</td>
                 <td colspan="2" style="border-left:1px solid #bbf7d0;border-top:2px solid #22c55e;"></td>
             </tr>
         </tbody>

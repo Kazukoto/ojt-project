@@ -17,6 +17,8 @@ class Attendance extends Model
         'time_in_af',
         'time_out_af',
         'afternoon_status',
+        'ot_time_in',
+        'ot_time_out',
         'overtime_hours',
         'total_hours',
         'nsd_time_in',

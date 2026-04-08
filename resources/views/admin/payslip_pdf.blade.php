@@ -172,9 +172,9 @@
 
         {{-- Row 9: Regular Holiday | Special Holiday (DATA ROW with actual values) --}}
         <tr class="{{ ($hasRegHol || $hasSpecHol) ? 'row-holiday' : '' }}">
-            <td class="lbl">REGULAR HOLIDAY PAY (200%)</td>
+            <td class="lbl">REGULAR HOLIDAY PAY (x2.0)</td>
             <td class="amt">{{ $hasRegHol ? '₱ ' . $reg_holiday_pay : '---' }}</td>
-            <td class="rlbl">SPECIAL HOLIDAY PAY (130%)</td>
+            <td class="rlbl">SPECIAL HOLIDAY PAY (x1.30)</td>
             <td class="rval">{{ $hasSpecHol ? '₱ ' . $spec_holiday_pay : '---' }}</td>
         </tr>
 

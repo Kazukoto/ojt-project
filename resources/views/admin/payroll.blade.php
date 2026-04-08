@@ -13,9 +13,7 @@
             user-select: none;
             white-space: nowrap;
         }
-        thead th.sortable:hover {
-            background: #5a54d4;
-        }
+        thead th.sortable:hover { background: #5a54d4; }
         thead th .sort-icon {
             display: inline-block;
             margin-left: 5px;
@@ -24,12 +22,39 @@
             vertical-align: middle;
         }
         thead th.sort-asc .sort-icon,
-        thead th.sort-desc .sort-icon {
-            opacity: 1;
-        }
+        thead th.sort-desc .sort-icon { opacity: 1; }
         thead th.sort-asc .sort-icon::after  { content: ' ▲'; }
         thead th.sort-desc .sort-icon::after { content: ' ▼'; }
         thead th:not(.sort-asc):not(.sort-desc) .sort-icon::after { content: ' ⇅'; }
+
+        /* ── Stats cards ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+            border-left: 4px solid #6366f1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-card.green  { border-left-color: #10b981; }
+        .stat-card.blue   { border-left-color: #3b82f6; }
+        .stat-card.orange { border-left-color: #f59e0b; }
+        .stat-card.red    { border-left-color: #ef4444; }
+        .stat-card.purple { border-left-color: #8b5cf6; }
+        .stat-card.gray   { border-left-color: #6b7280; }
+
+        .stat-icon  { font-size: 20px; margin-bottom: 2px; }
+        .stat-label { font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+        .stat-value { font-size: 20px; font-weight: 800; color: #1f2937; line-height: 1.1; }
+        .stat-sub   { font-size: 11px; color: #9ca3af; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -49,6 +74,46 @@
             <span>{{ \Carbon\Carbon::parse($startDate)->format('M d, Y') }}</span>
             —
             <span>{{ \Carbon\Carbon::parse($endDate)->format('M d, Y') }}</span>
+        </div>
+
+        {{-- ── STATS CARDS ── --}}
+        <div class="stats-grid">
+            <div class="stat-card green">
+                <div class="stat-icon">💰</div>
+                <div class="stat-label">Total Gross Pay</div>
+                <div class="stat-value">₱{{ number_format($stats['total_gross'], 2) }}</div>
+                <div class="stat-sub">All earnings before deductions</div>
+            </div>
+            <div class="stat-card blue">
+                <div class="stat-icon">🧾</div>
+                <div class="stat-label">Total Basic Pay</div>
+                <div class="stat-value">₱{{ number_format($stats['total_basic'], 2) }}</div>
+                <div class="stat-sub">Regular hours pay</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon">⏰</div>
+                <div class="stat-label">Total OT Pay</div>
+                <div class="stat-value">₱{{ number_format($stats['total_ot'], 2) }}</div>
+                <div class="stat-sub">Overtime at 1.25×</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon">🎒</div>
+                <div class="stat-label">Total Allowance</div>
+                <div class="stat-value">₱{{ number_format($stats['total_allowance'], 2) }}</div>
+                <div class="stat-sub">All position allowances</div>
+            </div>
+            <div class="stat-card red">
+                <div class="stat-icon">📉</div>
+                <div class="stat-label">Total Deductions</div>
+                <div class="stat-value">₱{{ number_format($stats['total_deductions'], 2) }}</div>
+                <div class="stat-sub">SSS, PhilHealth, Pag-IBIG, CA</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-label">Total Net Pay</div>
+                <div class="stat-value">₱{{ number_format($stats['total_net'], 2) }}</div>
+                <div class="stat-sub">{{ $stats['employee_count'] }} employee{{ $stats['employee_count'] != 1 ? 's' : '' }}</div>
+            </div>
         </div>
 
         {{-- FILTER FORM --}}
@@ -91,7 +156,6 @@
             <table id="payrollTable">
                 <thead>
                     <tr>
-                        {{-- Each sortable th has data-col identifying the sort key --}}
                         <th class="sortable {{ request('sort_by') == 'name' ? (request('sort_dir','asc') == 'asc' ? 'sort-asc' : 'sort-desc') : '' }}"
                             data-col="name" onclick="sortBy('name')">
                             Name <span class="sort-icon"></span>
@@ -116,8 +180,8 @@
                             data-col="cash_advance" onclick="sortBy('cash_advance')">
                             Cash Advance <span class="sort-icon"></span>
                         </th>
-                        <th class="sortable {{ request('sort_by') == 'gross_pay' ? (request('sort_dir','asc') == 'asc' ? 'sort-asc' : 'sort-desc') : '' }}"
-                            data-col="gross_pay" onclick="sortBy('gross_pay')">
+                        <th class="sortable {{ request('sort_by') == 'net_pay' ? (request('sort_dir','asc') == 'asc' ? 'sort-asc' : 'sort-desc') : '' }}"
+                            data-col="gross_pay" onclick="sortBy('net_pay')">
                             Gross Pay <span class="sort-icon"></span>
                         </th>
                     </tr>
@@ -139,21 +203,21 @@
                         '{{ $emp->nsd_110         ?? "—" }}',
                         '{{ $emp->reg_holiday     ?? "—" }}',
                         '{{ $emp->rest_ot         ?? "—" }}',
-                        '{{ $emp->grand_total     ?? "—" }}',
+                        '{{ $emp->gross_pay     ?? "—" }}',
                         '{{ $emp->special_holiday ?? "—" }}',
                         '{{ $emp->philhealth      ?? "—" }}',
                         '{{ $emp->sss             ?? "—" }}',
                         '{{ $emp->cash_advance    ?? "—" }}',
                         '{{ $emp->pagibig         ?? "—" }}',
-                        '{{ $emp->gross_pay       ?? "—" }}'
+                        '{{ $emp->net_pay       ?? "—" }}'
                     )">
                         <td>{{ $emp->last_name }}, {{ $emp->first_name }}</td>
                         <td>{{ $emp->allowance_total ?? '—' }}</td>
                         <td>{{ $emp->basic_total     ?? '—' }}</td>
                         <td>{{ $emp->ot_total        ?? '—' }}</td>
-                        <td>{{ $emp->grand_total     ?? '—' }}</td>
+                        <td>{{ $emp->gross_pay     ?? '—' }}</td>
                         <td>{{ $emp->cash_advance    ?? '—' }}</td>
-                        <td>{{ $emp->gross_pay       ?? '—' }}</td>
+                        <td>{{ $emp->net_pay      ?? '—' }}</td>
                     </tr>
                     @empty
                         <tr><td colspan="7" class="no-records">No payroll records found.</td></tr>
@@ -221,12 +285,12 @@
                 <tr><td>Sub-Total Basic Pay</td>  <td id="basicTotal"></td></tr>
                 <tr><td>Total NSD Hours</td>      <td id="nsdTotal"></td></tr>
                 <tr><td>Total OT Hours</td>       <td id="otTotal"></td></tr>
-                <tr><td>OT Rate 25%</td>          <td id="ot25"></td></tr>
+                <tr><td>OT Rate /hr</td>          <td id="ot25"></td></tr>
                 <tr><td>OT Regular</td>           <td id="otRegular"></td></tr>
                 <tr><td>Rest Day</td>             <td id="restDay"></td></tr>
-                <tr><td>NSD 110%</td>             <td id="nsd110"></td></tr>
-                <tr><td>Regular Holiday</td>      <td id="regHoliday"></td></tr>
-                <tr><td>Rest Day OT</td>          <td id="restOt"></td></tr>
+                <tr><td>NSD Pay</td>             <td id="nsd110"></td></tr>
+                <tr><td>Regular Holiday(x2.0)</td>      <td id="regHoliday"></td></tr>
+                <tr><td>Rest Day OT (x1.69)</td>          <td id="restOt"></td></tr>
                 <tr><td>Special Holiday</td>      <td id="specialHoliday"></td></tr>
             </table>
             <div class="modal-section-title">Deductions</div>
@@ -238,8 +302,8 @@
             </table>
             <div class="modal-section-title">Totals</div>
             <table>
-                <tr><td>Grand Total</td> <td id="grandTotal"></td></tr>
-                <tr><td>Gross Pay</td>   <td id="grossPay" class="gross-pay-value"></td></tr>
+                <tr><td>Gross Pay</td> <td id="grossPay"></td></tr>
+                <tr><td>Net Pay</td>   <td id="netPay" class="gross-pay-value"></td></tr>
             </table>
             <div style="margin-top:20px; text-align:right;">
                 <button class="close-btn" onclick="closeEmployeeModal()">✕ Close</button>
@@ -248,13 +312,9 @@
     </div>
 
     <script>
-        // ── Sort ──────────────────────────────────────────────
         function sortBy(col) {
             const currentCol = document.getElementById('sortByField').value;
             const currentDir = document.getElementById('sortDirField').value;
-
-            // Toggle direction if same column, otherwise default to asc
-            // Exception: name defaults to asc (A-Z), numeric cols default to desc (highest first)
             const numericCols = ['allowance_total','basic_total','ot_total','grand_total','cash_advance','gross_pay'];
             let newDir;
             if (currentCol === col) {
@@ -262,18 +322,16 @@
             } else {
                 newDir = numericCols.includes(col) ? 'desc' : 'asc';
             }
-
             document.getElementById('sortByField').value  = col;
             document.getElementById('sortDirField').value = newDir;
             document.getElementById('filterForm').submit();
         }
 
-        // ── Payroll detail modal ──────────────────────────────
         function openEmployeeModal(
             name, position, basicRate, days, allowanceTotal, basicTotal,
             nsdTotal, otTotal, ot25, otRegular, restDay, nsd110,
-            regHoliday, restOt, grandTotal, specialHoliday,
-            philhealth, sss, cashAdvance, pagibig, grossPay
+            regHoliday, restOt, grossPay, specialHoliday,
+            philhealth, sss, cashAdvance, pagibig, netPay
         ) {
             document.getElementById('empName').textContent        = name;
             document.getElementById('empPosition').textContent    = position;
@@ -294,8 +352,8 @@
             document.getElementById('sss').textContent            = sss;
             document.getElementById('pagibig').textContent        = pagibig;
             document.getElementById('cashAdvance').textContent    = cashAdvance;
-            document.getElementById('grandTotal').textContent     = grandTotal;
-            document.getElementById('grossPay').textContent       = grossPay;
+            document.getElementById('grossPay').textContent     = grossPay;
+            document.getElementById('netPay').textContent         = netPay;
             document.getElementById('employeeModal').style.display = 'flex';
         }
 
@@ -306,28 +364,20 @@
         document.getElementById('employeeModal').addEventListener('click', function(e) {
             if (e.target === this) closeEmployeeModal();
         });
-
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                document.getElementById('logoutForm').submit();
-            }
-        }
     </script>
 
 @else
     <script>window.location.href = "{{ route('login') }}";</script>
 @endif
 
-    {{-- ══ EXPORT FILTER MODAL ══════════════════════════════════ --}}
+    {{-- EXPORT FILTER MODAL --}}
     <div id="exportModal" class="modal-overlay">
         <div class="modal-box">
             <h2>📄 Export Payroll PDF</h2>
             <hr style="margin-bottom:16px;border:none;border-top:1px solid #eee;">
-
             <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">
                 Choose which employees to include in the exported PDF.
             </p>
-
             <div class="modal-row">
                 <span class="modal-label">Position</span>
                 <select id="exportPosition" class="modal-select">
@@ -337,17 +387,14 @@
                     @endforeach
                 </select>
             </div>
-
             <div class="modal-row">
                 <span class="modal-label">From</span>
                 <input type="date" id="exportStart" class="modal-input" value="{{ $startDate }}">
             </div>
-
             <div class="modal-row">
                 <span class="modal-label">To</span>
                 <input type="date" id="exportEnd" class="modal-input" value="{{ $endDate }}">
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn-cancel-modal" onclick="closeExportModal()">✕ Cancel</button>
                 <button type="button" class="btn-export-modal" onclick="doExport()">📄 Export PDF</button>
@@ -378,14 +425,11 @@
             const position = document.getElementById('exportPosition').value;
             const start    = document.getElementById('exportStart').value;
             const end      = document.getElementById('exportEnd').value;
-
             if (!start || !end) { alert('Please select a date range.'); return; }
             if (new Date(start) > new Date(end)) { alert('Start date cannot be after end date.'); return; }
-
             const params = new URLSearchParams({ start_date: start, end_date: end });
             if (position) params.append('position', position);
-
-            window.open('{{ route("admin.payroll_pdf") }}?' + params.toString(), '_blank');
+            window.open('{{ route("superadmin.payroll_pdf") }}?' + params.toString(), '_blank');
             closeExportModal();
         }
 

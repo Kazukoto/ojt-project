@@ -27,7 +27,7 @@ Route::get('/timekeeper/index',
     ->name('timekeeper.index');
 
 Route::get('/register', [RegisterUserController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterUserController::class, 'register'])->name('register.submit');
+Route::post('/register', [RegisterUserController::class, 'register'])->name('modal.store');
 
 /* =========================
    USERS
@@ -90,11 +90,16 @@ Route::post('/timekeeper/attendance/store-nsd', [TimekeeperController::class, 's
 /* =========================
    CASH ADVANCE
 ========================= */
-Route::prefix('timekeeper')->group(function () {
-    Route::get('/cashadvance/{id}/modal', [CashAdvanceController::class, 'getCashAdvanceModal']);
-    Route::put('/cashadvance/{id}', [CashAdvanceController::class, 'updateCashAdvance'])->name('timekeeper.cashadvance.update');
-    Route::delete('/cashadvance/{id}', [CashAdvanceController::class, 'deleteCashAdvance'])->name('timekeeper.cashadvance.delete');
-});
+
+Route::get('/timekeeper/cashadvance', [CashAdvanceController::class, 'index']) 
+    ->name('timekeeper.cashadvance');
+
+Route::post('/timekeeper/cashadvance/store', [CashAdvanceController::class,'storeCashAdvance']) 
+    ->name('timekeeper.cashadvance.store');
+
+Route::post('/timekeeper/editCashAdvance', [CashAdvanceController::class,'cashAdvanceForm']) 
+    ->name('timekeeper.cashadvance.update');
+
 
 /* =========================
    MODAL REGISTER

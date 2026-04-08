@@ -18,10 +18,10 @@
 
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('login');
 });
-Route::get('/auth/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/auth/login', [LoginController::class, 'login']);
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'login']);
 
 Route::get('/register', [RegisterUserController::class, 'show'])->name('register');
 Route::post('/register', [RegisterUserController::class, 'register']);

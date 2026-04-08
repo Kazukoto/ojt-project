@@ -23,34 +23,198 @@ use Illuminate\Support\Facades\Storage;
 class FinanceController extends Controller
 {
     public function index(Request $request)
-    {
-        $search = $request->search;
+{
+    $search = $request->search;
 
-        // Get employees, optionally filtered by search
-        $employees = Employee::when($search, function ($query, $search) {
+    $employees = Employee::when($search, function ($query, $search) {
             $query->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%");
-        })->latest()->take(10)->paginate(10);
+                  ->orWhere('last_name',  'like', "%{$search}%");
+        })
+        ->latest()
+        ->paginate(10);
 
-        $totalUsers = Employee::count();
-        $totalOvertime = DB::table('attendances')->sum('overtime_hours') ?? 0;
-        $newEmployees = Employee::where('created_at', '>=', now()->subDays(15))->count();
-        $lastMonthEmployees = Employee::whereBetween('created_at', [
-            now()->subMonth()->startOfMonth(),
-            now()->subMonth()->endOfMonth()
-        ])->count();
-        
-        $totalCashAdvance = DB::table('cash_advances')->sum('amount') ?? 0;
+    $now   = now();
+    $today = $now->toDateString();
 
-        return view('finance.index', compact(
-            'employees',
-            'totalUsers',
-            'totalOvertime',
-            'newEmployees',
-            'lastMonthEmployees',
-            'totalCashAdvance',
-        ));
+    // ── Attendance today ───────────────────────────────────
+    $todayAttendance = Attendance::whereDate('date', $today)->get();
+
+    $totalPresentToday = $todayAttendance->filter(function ($record) {
+            return $record->morning_status === 'Present'
+                || $record->afternoon_status === 'Present';
+        })->count();
+
+    $totalAbsentToday = $todayAttendance->filter(function ($record) {
+            return $record->morning_status === 'Absent'
+                && $record->afternoon_status === 'Absent';
+        })->count();
+
+    // ── Employee counts ────────────────────────────────────
+    $totalUsers         = Employee::count();
+    $totalMale          = Employee::where('gender', 'Male')->count();
+    $totalFemale        = Employee::where('gender', 'Female')->count();
+    $newEmployees       = Employee::where('created_at', '>=', $now->copy()->subDays(15))->count();
+    $lastMonthEmployees = Employee::whereBetween('created_at', [
+        $now->copy()->subMonth()->startOfMonth(),
+        $now->copy()->subMonth()->endOfMonth()
+    ])->count();
+
+    // ── Cash advance total (approved only) ────────────────
+    $totalCashAdvance = DB::table('cash_advances')->where('status', 'approved')->sum('amount') ?? 0;
+
+    // ── Employees by Position (for pie chart) ─────────────
+    $positionCounts = Employee::selectRaw('position, COUNT(*) as total')
+        ->whereNotNull('position')
+        ->groupBy('position')
+        ->orderByDesc('total')
+        ->get();
+
+    // ── Cutoff toggle ──────────────────────────────────────
+    $day           = (int) $now->format('d');
+    $defaultCutoff = $day <= 15 ? 'first' : 'second';
+    $cutoff        = $request->get('cutoff', $defaultCutoff);
+
+    if ($cutoff === 'first') {
+        $cutoffStart = $now->copy()->startOfMonth()->toDateString();
+        $cutoffEnd   = $now->copy()->startOfMonth()->addDays(14)->toDateString();
+    } else {
+        $cutoffStart = $now->copy()->startOfMonth()->addDays(15)->toDateString();
+        $cutoffEnd   = $now->copy()->endOfMonth()->toDateString();
     }
+
+    $cutoffLabel = \Carbon\Carbon::parse($cutoffStart)->format('M d')
+                 . ' – '
+                 . \Carbon\Carbon::parse($cutoffEnd)->format('M d, Y');
+
+    // ── Allowance map ──────────────────────────────────────
+    $allowanceMap = [
+        'Leadman'      => 150, 'Mason'        => 100, 'Carpenter'    => 100,
+        'Plumber'      => 175, 'Laborer'      => 100, 'Painter'      => 0,
+        'Warehouseman' => 100, 'Driver'       => 0,   'Truck Helper' => 0,
+        'Welder'       => 150, 'Engineer'     => 150, 'Foreman'      => 150,
+        'Timekeeper'   => 100, 'Finance'      => 100, 'Admin'        => 100,
+    ];
+
+    // ── Attendance grouped per employee for cutoff ────────
+    $attendanceRecords = \App\Models\Attendance::whereBetween('date', [$cutoffStart, $cutoffEnd])
+        ->get()
+        ->groupBy('employee_id');
+
+    // ── Cash advances for cutoff ───────────────────────────
+    $cashAdvances = \App\Models\CashAdvance::where('status', 'Approved')
+        ->whereBetween('created_at', [$cutoffStart . ' 00:00:00', $cutoffEnd . ' 23:59:59'])
+        ->selectRaw('employee_id, SUM(amount) as total_ca')
+        ->groupBy('employee_id')
+        ->get()
+        ->keyBy('employee_id');
+
+    // ── Determine if 2nd cutoff for statutory deductions ──
+    $cutoffDay      = (int) \Carbon\Carbon::parse($cutoffStart)->format('d');
+    $isSecondCutoff = $cutoffDay >= 16;
+
+    // ── Payroll breakdown — mirrors SuperAdminPayrollController ──
+    $totalGrossPay  = 0;
+    $totalBasicPay  = 0;
+    $totalOTPay     = 0;
+    $totalAllowance = 0;
+    $totalNetPay    = 0;
+
+    $allEmployees = Employee::all();
+
+    foreach ($allEmployees as $emp) {
+        $records    = $attendanceRecords[$emp->id] ?? collect();
+        $dailyRate  = floatval($emp->rating ?? 0);
+        $hourlyRate = $dailyRate > 0 ? $dailyRate / 8 : 0;
+        $allowancePerDay = floatval($allowanceMap[$emp->position] ?? 100);
+
+        // Statutory deductions — only on 2nd cutoff
+        $sssDeduction        = $isSecondCutoff ? floatval($emp->sss_amount        ?? 0) : 0;
+        $philhealthDeduction = $isSecondCutoff ? floatval($emp->philhealth_amount ?? 0) : 0;
+        $pagibigDeduction    = $isSecondCutoff ? floatval($emp->pagibig_amount    ?? 0) : 0;
+
+        // ── Accumulators ──────────────────────────────────
+        $totalHours       = 0;
+        $totalOT          = 0;
+        $totalNSD         = floatval($records->sum('nsd_hours'));
+        $restDayHours     = 0;
+        $restDayOT        = 0;
+        $regHolidayPay    = 0;
+        $specHolidayPay   = 0;
+        $regHolidayHours  = 0;
+        $specHolidayHours = 0;
+
+        foreach ($records as $att) {
+            $isRestDay   = \Carbon\Carbon::parse($att->date)->dayOfWeek === 0;
+            $holidayType = ($att->holiday_type !== null && $att->holiday_type !== '')
+                            ? $att->holiday_type : null;
+            $hours = floatval($att->total_hours    ?? 0);
+            $ot    = floatval($att->overtime_hours ?? 0);
+
+            if ($holidayType === 'regular_holiday') {
+                $regHolidayPay   += $hourlyRate * 2.0  * $hours;
+                $regHolidayHours += $hours;
+            } elseif ($holidayType === 'special_non_working') {
+                $specHolidayPay   += $hourlyRate * 1.30 * $hours;
+                $specHolidayHours += $hours;
+            } elseif ($holidayType === 'special_working') {
+                $totalHours += $hours;
+                $totalOT    += $ot;
+            } elseif ($isRestDay) {
+                $restDayHours += $hours;
+                $restDayOT    += $ot;
+            } else {
+                $totalHours += $hours;
+                $totalOT    += $ot;
+            }
+        }
+
+        // All worked hours including rest days — for allowance
+        $allWorkedHours = $totalHours + $regHolidayHours + $specHolidayHours + $restDayHours;
+        $daysWorked     = $allWorkedHours > 0 ? round($allWorkedHours / 8, 2) : 0;
+
+        // ── Pay computation (same as SuperAdminPayrollController) ──
+        $basicPay       = $hourlyRate * $totalHours;
+        $otTotalPay     = $hourlyRate * 1.25  * $totalOT;
+        $nsdPay         = $hourlyRate * 1.10  * $totalNSD;
+        $allowanceTotal = $allowancePerDay     * $daysWorked;
+        $restDayPay     = $hourlyRate * 1.30  * $restDayHours;
+        $restDayOTPay   = $hourlyRate * 1.69  * $restDayOT;
+
+        $grandTotal = $basicPay + $otTotalPay + $nsdPay + $allowanceTotal
+                    + $restDayPay + $restDayOTPay
+                    + $regHolidayPay + $specHolidayPay;
+
+        $ca              = floatval($cashAdvances[$emp->id]->total_ca ?? 0);
+        $totalDeductions = $sssDeduction + $philhealthDeduction + $pagibigDeduction + $ca;
+        $netPay          = max(0, $grandTotal - $totalDeductions);
+
+        $totalGrossPay  += $grandTotal;
+        $totalBasicPay  += $basicPay;
+        $totalOTPay     += $otTotalPay;
+        $totalAllowance += $allowanceTotal;
+        $totalNetPay    += $netPay;
+    }
+
+    return view('finance.index', compact(
+        'employees',
+        'totalUsers',
+        'totalMale',
+        'totalFemale',
+        'newEmployees',
+        'lastMonthEmployees',
+        'totalCashAdvance',
+        'totalGrossPay',
+        'totalNetPay',
+        'totalBasicPay',
+        'totalOTPay',
+        'totalAllowance',
+        'cutoffLabel',
+        'defaultCutoff',
+        'totalPresentToday',
+        'totalAbsentToday',
+        'positionCounts'
+    ));
+}
 
     public function users(Request $request)
 {
@@ -1461,52 +1625,65 @@ private $allowanceMap = [
     // SHOW PAYROLL PAGE
     // =========================================================
     public function showPayroll(Request $request)
-    {
-        $start    = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $end      = $request->end_date   ?? now()->startOfMonth()->addDays(14)->toDateString();
-        $search   = $request->search;
-        $position = $request->position;
-        $sortBy   = $request->sort_by  ?? null;
-        $sortDir  = $request->sort_dir ?? 'asc';
+{
+    $start    = $request->start_date ?? now()->startOfMonth()->toDateString();
+    $end      = $request->end_date   ?? now()->startOfMonth()->addDays(14)->toDateString();
+    $search   = $request->search;
+    $position = $request->position;
+    $sortBy   = $request->sort_by  ?? null;
+    $sortDir  = $request->sort_dir ?? 'asc';
 
-        $allCalculated = $this->calculatePayroll($start, $end, $search, $position);
+    // Calculate ALL employees (no search/position filter) for accurate stats
+    $allForStats = $this->calculatePayroll($start, $end);
 
-        if ($sortBy) {
-            $allCalculated = $allCalculated->sortBy(function ($emp) use ($sortBy) {
-                if ($sortBy === 'name')            return strtolower(($emp->last_name ?? '') . ' ' . ($emp->first_name ?? ''));
-                if ($sortBy === 'allowance_total') return floatval(str_replace(',', '', $emp->allowance_total ?? 0));
-                if ($sortBy === 'basic_total')     return floatval(str_replace(',', '', $emp->basic_total     ?? 0));
-                if ($sortBy === 'ot_total')        return floatval(str_replace(',', '', $emp->ot_total        ?? 0));
-                if ($sortBy === 'grand_total')     return floatval(str_replace(',', '', $emp->grand_total     ?? 0));
-                if ($sortBy === 'cash_advance')    return floatval(str_replace(',', '', $emp->cash_advance    ?? 0));
-                if ($sortBy === 'gross_pay')       return floatval(str_replace(',', '', $emp->gross_pay       ?? 0));
-                return strtolower($emp->last_name ?? '');
-            }, SORT_REGULAR, $sortDir === 'desc')->values();
-        }
+    $stats = [
+        'total_gross'      => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->gross_pay    ?? 0))),
+        'total_basic'      => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->basic_total  ?? 0))),
+        'total_ot'         => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->ot_25        ?? 0))),
+        'total_allowance'  => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->allowance_total ?? 0))),
+        'total_deductions' => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->total_deductions ?? 0))),
+        'total_net'        => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->net_pay      ?? 0))),
+        'employee_count'   => $allForStats->count(),
+    ];
 
-        $perPage     = 15;
-        $currentPage = (int) ($request->page ?? 1);
-        $total       = $allCalculated->count();
-        $items       = $allCalculated->slice(($currentPage - 1) * $perPage, $perPage)->values();
+    $allCalculated = $this->calculatePayroll($start, $end, $search, $position);
 
-        $employees = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-
-        $positions = Employee::select('position')
-            ->distinct()
-            ->whereNotNull('position')
-            ->pluck('position');
-
-        $startDate = $start;
-        $endDate   = $end;
-
-        return view('finance.payroll', compact('employees', 'positions', 'startDate', 'endDate'));
+    if ($sortBy) {
+        $allCalculated = $allCalculated->sortBy(function ($emp) use ($sortBy) {
+            if ($sortBy === 'name')            return strtolower(($emp->last_name ?? '') . ' ' . ($emp->first_name ?? ''));
+            if ($sortBy === 'allowance_total') return floatval(str_replace(',', '', $emp->allowance_total ?? 0));
+            if ($sortBy === 'basic_total')     return floatval(str_replace(',', '', $emp->basic_total     ?? 0));
+            if ($sortBy === 'ot_total')        return floatval(str_replace(',', '', $emp->ot_total        ?? 0));
+            if ($sortBy === 'grand_total')     return floatval(str_replace(',', '', $emp->grand_total     ?? 0));
+            if ($sortBy === 'cash_advance')    return floatval(str_replace(',', '', $emp->cash_advance    ?? 0));
+            if ($sortBy === 'gross_pay')       return floatval(str_replace(',', '', $emp->gross_pay       ?? 0));
+            return strtolower($emp->last_name ?? '');
+        }, SORT_REGULAR, $sortDir === 'desc')->values();
     }
+
+    $perPage     = 10;
+    $currentPage = (int) ($request->page ?? 1);
+    $total       = $allCalculated->count();
+    $items       = $allCalculated->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+    $employees = new \Illuminate\Pagination\LengthAwarePaginator(
+        $items,
+        $total,
+        $perPage,
+        $currentPage,
+        ['path' => $request->url(), 'query' => $request->query()]
+    );
+
+    $positions = Employee::select('position')
+        ->distinct()
+        ->whereNotNull('position')
+        ->pluck('position');
+
+    $startDate = $start;
+    $endDate   = $end;
+
+    return view('finance.payroll', compact('employees', 'positions', 'startDate', 'endDate', 'stats'));
+}
 
     // =========================================================
     // EXPORT PAYROLL PDF

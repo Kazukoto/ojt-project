@@ -17,7 +17,7 @@ class LoginController extends Controller
             return $this->redirectBasedOnRole(Session::get('role_id'));
         }
 
-        return view('auth.login');
+        return view('login');
     }
 
     public function login(Request $request)

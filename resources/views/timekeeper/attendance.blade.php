@@ -19,16 +19,10 @@
         .stamp-time       { color:#9ca3af; font-size:9px; }
         .user-stamp-empty { color:#d1d5db; font-style:italic; }
 
-        #bulkSaveBar {
+        .save-bar {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
             gap: 12px;
-            margin-bottom: 12px;
-            padding: 0;
-            background: transparent;
-            border: none;
-            box-shadow: none;
         }
         .btn-bulk-save {
             padding: 9px 22px;
@@ -43,52 +37,91 @@
             align-items: center;
             gap: 6px;
             transition: opacity .2s;
+            white-space: nowrap;
         }
         .btn-bulk-save:hover    { opacity: .88; }
         .btn-bulk-save:disabled { opacity: .5; cursor: not-allowed; }
 
-        #saveProgressWrap {
+        .progress-wrap {
             display: none;
             align-items: center;
             gap: 10px;
             flex: 1;
         }
-        #saveProgressTrack {
-            flex: 1;
-            background: #e2e8f0;
-            border-radius: 6px;
-            height: 8px;
-            overflow: hidden;
-        }
-        #saveProgressFill {
-            height: 100%;
-            background: linear-gradient(90deg, #6366f1, #4f46e5);
-            width: 0%;
-            transition: width .3s;
-        }
-        #saveProgressText { font-size: 12px; color: #64748b; white-space: nowrap; }
+        .progress-track { flex:1; background:#e2e8f0; border-radius:6px; height:8px; overflow:hidden; }
+        .progress-fill  { height:100%; background:linear-gradient(90deg,#6366f1,#4f46e5); width:0%; transition:width .3s; }
+        .progress-text  { font-size:12px; color:#64748b; white-space:nowrap; }
 
-        #bulkResult {
-            display: none;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 6px;
-        }
-        #bulkResult.ok  { background: #d1fae5; color: #065f46; }
-        #bulkResult.err { background: #fee2e2; color: #991b1b; }
+        .bulk-result { display:none; font-size:13px; font-weight:600; padding:4px 12px; border-radius:6px; }
+        .bulk-result.ok  { background:#d1fae5; color:#065f46; }
+        .bulk-result.err { background:#fee2e2; color:#991b1b; }
 
         tr.row-saved td { animation: savedFlash .6s ease forwards; }
-        @keyframes savedFlash {
-            0%   { background: #d1fae5; }
-            100% { background: transparent; }
-        }
+        @keyframes savedFlash { 0% { background:#d1fae5; } 100% { background:transparent; } }
 
         .pagination { margin-top:10px; padding:20px; display:flex; justify-content:center; gap:5px; flex-wrap:wrap; }
         .pagination a, .pagination span { padding:8px 12px; border:1px solid #ccc; text-decoration:none; color:#333; font-size:14px; border-radius:4px; transition:all .2s; }
         .pagination a:hover { background:linear-gradient(135deg,#667eea,#764ba2); color:white; border-color:#667eea; }
         .pagination .active { background:linear-gradient(135deg,#667eea,#764ba2); color:white; font-weight:bold; border-color:#667eea; }
         .pagination .disabled { color:#999; pointer-events:none; background:#f5f5f5; cursor:not-allowed; }
+
+        .status-badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:700; white-space:nowrap; }
+        .status-badge.present  { background:#d1fae5; color:#065f46; }
+        .status-badge.half-day { background:#eff6ff; color:#1e40af; }
+        .status-badge.absent   { background:#fee2e2; color:#991b1b; }
+        .status-badge.unfilled { background:#f3f4f6; color:#6b7280; }
+
+        /* OT layout toggle buttons */
+        .ot-layout-bar { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+        .ot-layout-bar span { font-size:13px; color:#6b7280; margin-right:4px; }
+        .btn-layout {
+            padding: 5px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #374151;
+            transition: all .15s;
+        }
+        .btn-layout.active { background:linear-gradient(135deg,#3b82f6,#2563eb); border-color:#3b82f6; color:#fff; }
+        .btn-layout:hover:not(.active) { border-color:#3b82f6; color:#2563eb; }
+
+        /* Dual table dividers */
+        #otDualTable .dual-divider  { border-left:3px solid #ffffff; }
+        #nsdDualTable .dual-divider { border-left:3px solid #ffffff; }
+
+        /* NSD layout toggle */
+        .nsd-layout-bar { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+        .nsd-layout-bar span { font-size:13px; color:#6b7280; margin-right:4px; }
+        .btn-nsd-layout {
+            padding: 5px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #374151;
+            transition: all .15s;
+        }
+        .btn-nsd-layout.active { background:linear-gradient(135deg,#0ea5e9,#0284c7); border-color:#0ea5e9; color:#fff; }
+        .btn-nsd-layout:hover:not(.active) { border-color:#0ea5e9; color:#0284c7; }
+
+        /* Combined filter + save bar row */
+        .filter-save-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .filter-save-row .controls {
+            margin-bottom: 0 !important;
+            flex: 1;
+            min-width: 0;
+        }
     </style>
 </head>
 <body>
@@ -108,7 +141,6 @@
             <h1 class="page-title"><span class="icon">📋</span> Attendance</h1>
         </div>
 
-        {{-- Holiday Banner --}}
         @if($holidayInfo['is_holiday'])
             @php
                 $bannerColors = [
@@ -144,65 +176,98 @@
             </div>
         @endif
 
+        {{-- TAB BUTTONS --}}
         <div class="toggle-container">
             <button id="regularBtn" class="toggle-btn active" onclick="showRegular()">☀ Regular</button>
+            <button id="otBtn"      class="toggle-btn"        onclick="showOT()">⏰ Overtime</button>
             <button id="nsdBtn"     class="toggle-btn"        onclick="showNsd()">🌙 NSD</button>
         </div>
 
-        <form action="{{ route('timekeeper.attendance') }}" method="GET" class="controls">
-            <input type="text" name="search" class="search-box" placeholder="🔍 Search by name..." value="{{ request('search') }}">
-            <select name="position" class="filter-box">
-                <option value="">All Positions</option>
-                @foreach($positions as $pos)
-                    <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
-                @endforeach
-            </select>
-            <input type="date" name="date" class="date-input" value="{{ $selectedDate }}">
-            <button type="submit" class="btn-filter">Filter</button>
-        </form>
+        {{-- ══════════ COMBINED FILTER + SAVE BAR ROW ══════════ --}}
+        <div class="filter-save-row">
 
-        {{-- BULK SAVE BAR — REGULAR --}}
-        <div id="bulkSaveBar">
-            <div id="saveProgressWrap">
-                <div id="saveProgressTrack"><div id="saveProgressFill"></div></div>
-                <span id="saveProgressText">0 / 0</span>
+            <form action="{{ route('timekeeper.attendance') }}" method="GET" class="controls">
+                <input type="text" name="search" class="search-box" placeholder="🔍 Search by name..." value="{{ request('search') }}">
+                <select name="position" class="filter-box">
+                    <option value="">All Positions</option>
+                    @foreach($positions as $pos)
+                        <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>{{ $pos }}</option>
+                    @endforeach
+                </select>
+                <input type="date" name="date" class="date-input" value="{{ $selectedDate }}">
+                <button type="submit" class="btn-filter">Filter</button>
+            </form>
+
+            {{-- Regular save bar --}}
+            <div id="regularSaveBar" class="save-bar" style="flex-shrink:0;">
+                <div id="regProgressWrap" class="progress-wrap">
+                    <div class="progress-track"><div id="regProgressFill" class="progress-fill"></div></div>
+                    <span id="regProgressText" class="progress-text">0 / 0</span>
+                </div>
+                <div id="regBulkResult" class="bulk-result"></div>
+                <button type="button" class="btn-bulk-save" id="btnBulkSave" onclick="saveAllRegular()">
+                    💾 Save All Attendance
+                </button>
             </div>
-            <div id="bulkResult"></div>
-            <button type="button" class="btn-bulk-save" id="btnBulkSave" onclick="saveAllRegular()">
-                💾 Save All Attendance
-            </button>
+
+            {{-- OT save bar --}}
+            <div id="otSaveBar" class="save-bar" style="display:none; flex-shrink:0;">
+                <div id="otProgressWrap" class="progress-wrap">
+                    <div class="progress-track"><div id="otProgressFill" class="progress-fill" style="background:linear-gradient(90deg,#3b82f6,#2563eb);"></div></div>
+                    <span id="otProgressText" class="progress-text"></span>
+                </div>
+                <div id="otBulkResult" class="bulk-result"></div>
+                <button type="button" class="btn-bulk-save" id="btnBulkOT" onclick="saveAllOT()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                    💾 Save All OT
+                </button>
+            </div>
+
+            {{-- NSD save bar --}}
+            <div id="nsdSaveBar" class="save-bar" style="display:none; flex-shrink:0;">
+                <div id="nsdProgressWrap" class="progress-wrap">
+                    <div class="progress-track"><div id="nsdProgressFill" class="progress-fill" style="background:linear-gradient(90deg,#0ea5e9,#0284c7);"></div></div>
+                    <span id="nsdProgressText" class="progress-text"></span>
+                </div>
+                <div id="nsdBulkResult" class="bulk-result"></div>
+                <button type="button" class="btn-bulk-save" id="btnBulkNsd" onclick="saveAllNsd()" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
+                    💾 Save All NSD
+                </button>
+            </div>
+
         </div>
 
-        {{-- REGULAR TABLE --}}
+        {{-- ══════════ REGULAR ══════════ --}}
         <div id="regularTable" class="table-wrapper">
             <table class="data-table" id="regularDataTable">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>AM In (8-12)</th>
-                        <th>AM Out (8-12)</th>
-                        <th>AM Status</th>
-                        <th>PM In (1-5)</th>
-                        <th>PM Out (1-5)</th>
-                        <th>PM Status</th>
-                        <th>OT Hours (6-9PM)</th>
-                        <th>Day Type</th>
+                        <th>Name</th><th>Position</th>
+                        <th>AM In (8-12)</th><th>AM Out (8-12)</th>
+                        <th>PM In (1-5)</th><th>PM Out (1-5)</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($employees as $employee)
+                    @php
+                        $att          = $attendances[$employee->id] ?? null;
+                        $morningVal   = $att->morning_status   ?? null;
+                        $afternoonVal = $att->afternoon_status ?? null;
+                        if (!$morningVal)   $morningVal   = ($att->time_in    ?? null) ? 'Present' : $defaultStatus;
+                        if (!$afternoonVal) $afternoonVal = ($att->time_in_af ?? null) ? 'Present' : $defaultStatus;
+                        $bothPresent    = in_array($morningVal,   ['Present','Late']) && in_array($afternoonVal, ['Present','Late']);
+                        $nonePresent    = !in_array($morningVal,  ['Present','Late']) && !in_array($afternoonVal, ['Present','Late']);
+                        $combinedStatus = $bothPresent ? 'Present' : ($nonePresent ? $defaultStatus : 'Half Day');
+                        $badgeClass     = match($combinedStatus) { 'Present'=>'present','Half Day'=>'half-day','Absent'=>'absent',default=>'unfilled' };
+                    @endphp
                     <tr data-employee-id="{{ $employee->id }}">
                         <td class="employee-name">
                             <div class="name-cell">
-                                <div class="avatar">{{ strtoupper(substr($employee->first_name, 0, 1)) }}</div>
+                                <div class="avatar">{{ strtoupper(substr($employee->first_name,0,1)) }}</div>
                                 <div>
                                     <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
-                                    @if(isset($attendances[$employee->id]) && $attendances[$employee->id]->updated_by)
-                                        <div class="user-stamp">
-                                            ✏️ {{ $attendances[$employee->id]->updated_by }}
-                                            <span class="stamp-time">{{ \Carbon\Carbon::parse($attendances[$employee->id]->updated_at)->format('M d, g:i A') }}</span>
-                                        </div>
+                                    @if($att && $att->updated_by)
+                                        <div class="user-stamp">✏️ {{ $att->updated_by }} <span class="stamp-time">{{ \Carbon\Carbon::parse($att->updated_at)->format('M d, g:i A') }}</span></div>
                                     @else
                                         <div class="user-stamp user-stamp-empty">— not yet saved</div>
                                     @endif
@@ -210,205 +275,136 @@
                             </div>
                         </td>
                         <td>{{ $employee->position }}</td>
-                        <!-- AM In -->
-                        <td>
-                            <input type="time" class="time-input time-in-am reg-time-in-am"
-                                   data-employee="{{ $employee->id }}"
-                                   min="08:00" max="12:00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->time_in : '' }}"
-                                   onchange="validateTimeRange(this,'08:00','12:00','AM In'); updateMorningStatus(this);">
-                        </td>
-                        <!-- AM Out -->
-                        <td>
-                            <input type="time" class="time-input reg-time-out-am"
-                                   data-employee="{{ $employee->id }}"
-                                   min="08:00" max="12:00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->time_out : '' }}"
-                                   onchange="validateTimeRange(this,'08:00','12:00','AM Out')">
-                        </td>
-                        <!-- AM Status -->
-                        @php
-                            $morningVal = $attendances[$employee->id]->morning_status ?? null;
-                            if (!$morningVal) {
-                                $morningVal = ($attendances[$employee->id]->time_in ?? null) ? 'Present' : $defaultStatus;
-                            }
-                        @endphp
-                        <td>
-                            <input type="text"
-                                   class="status-display status-morning reg-morning-status status-{{ strtolower(str_replace(' ','-',$morningVal)) }}"
-                                   data-employee="{{ $employee->id }}"
-                                   value="{{ $morningVal }}"
-                                   readonly>
-                        </td>
-                        <!-- PM In -->
-                        <td>
-                            <input type="time" class="time-input time-in-pm reg-time-in-pm"
-                                   data-employee="{{ $employee->id }}"
-                                   min="13:00" max="17:00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->time_in_af : '' }}"
-                                   onchange="validateTimeRange(this,'13:00','17:00','PM In'); updateAfternoonStatus(this);">
-                        </td>
-                        <!-- PM Out -->
-                        <td>
-                            <input type="time" class="time-input time-out-pm reg-time-out-pm"
-                                   data-employee="{{ $employee->id }}"
-                                   min="13:00" max="17:00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->time_out_af : '' }}"
-                                   onchange="validateTimeRange(this,'13:00','17:00','PM Out'); updateAfternoonStatus(this);">
-                        </td>
-                        <!-- PM Status -->
-                        @php
-                            $afternoonVal = $attendances[$employee->id]->afternoon_status ?? null;
-                            if (!$afternoonVal) {
-                                $afternoonVal = ($attendances[$employee->id]->time_in_af ?? null) ? 'Present' : $defaultStatus;
-                            }
-                        @endphp
-                        <td>
-                            <input type="text"
-                                   class="status-display status-afternoon reg-afternoon-status status-{{ strtolower(str_replace(' ','-',$afternoonVal)) }}"
-                                   data-employee="{{ $employee->id }}"
-                                   value="{{ $afternoonVal }}"
-                                   readonly>
-                        </td>
-                        <!-- OT -->
-                        <td>
-                            <input type="number" step="0.01" class="ot-input reg-ot"
-                                   data-employee="{{ $employee->id }}"
-                                   placeholder="0.00" min="0" max="3"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->overtime_hours : '' }}"
-                                   onchange="validateOTHours(this)"
-                                   title="OT: 6 PM - 9 PM (Max 3 hours)">
-                        </td>
-                        <!-- Day Type -->
-                        <td>
-                            @php
-                                $att        = $attendances[$employee->id] ?? null;
-                                $hType      = $att->holiday_type ?? $holidayInfo['holiday_type'];
-                                $hName      = $att->holiday_name ?? $holidayInfo['holiday_name'];
-                                $badgeColor = match($hType) {
-                                    'regular_holiday'     => '#dc3545',
-                                    'special_non_working' => '#fd7e14',
-                                    'special_working'     => '#198754',
-                                    default               => '#6c757d',
-                                };
-                                $hLabel = match($hType) {
-                                    'regular_holiday'     => 'Reg. Holiday',
-                                    'special_non_working' => 'Sp. Non-Work',
-                                    'special_working'     => 'Sp. Working',
-                                    default               => 'Regular',
-                                };
-                            @endphp
-                            <span style="background:{{ $badgeColor }};color:white;font-size:11px;padding:3px 8px;border-radius:12px;white-space:nowrap;font-weight:600;">{{ $hLabel }}</span>
-                            @if($hName)<div style="font-size:10px;color:#6b7280;margin-top:2px;">{{ $hName }}</div>@endif
-                        </td>
+                        <td><input type="time" class="time-input time-in-am reg-time-in-am" data-employee="{{ $employee->id }}" min="07:00" max="12:00" value="{{ $att->time_in ?? '' }}" onchange="validateTimeRange(this,'07:00','12:00','AM In'); updateCombinedStatus({{ $employee->id }});"></td>
+                        <td><input type="time" class="time-input reg-time-out-am" data-employee="{{ $employee->id }}" min="07:00" max="12:00" value="{{ $att->time_out ?? '' }}" onchange="validateTimeRange(this,'07:00','12:00','AM Out')"></td>
+                        <td><input type="time" class="time-input time-in-pm reg-time-in-pm" data-employee="{{ $employee->id }}" min="13:00" max="17:00" value="{{ $att->time_in_af ?? '' }}" onchange="validateTimeRange(this,'13:00','17:00','PM In'); updateCombinedStatus({{ $employee->id }});"></td>
+                        <td><input type="time" class="time-input time-out-pm reg-time-out-pm" data-employee="{{ $employee->id }}" min="13:00" max="17:00" value="{{ $att->time_out_af ?? '' }}" onchange="validateTimeRange(this,'13:00','17:00','PM Out'); updateCombinedStatus({{ $employee->id }});"></td>
+                        <td><span class="status-badge {{ $badgeClass }} reg-combined-status" data-employee="{{ $employee->id }}">{{ $combinedStatus }}</span></td>
                     </tr>
                     @empty
-                    <tr><td colspan="10" class="no-data">No employees found for this date.</td></tr>
+                    <tr><td colspan="7" class="no-data">No employees found for this date.</td></tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
-        {{-- NSD BULK SAVE BAR --}}
-        <div id="nsdSaveBar" style="display:none;align-items:center;justify-content:flex-end;gap:12px;margin-bottom:12px;padding:0;background:transparent;border:none;">
-            <div id="nsdProgressWrap" style="display:none;align-items:center;gap:10px;flex:1;">
-                <div style="flex:1;background:#e2e8f0;border-radius:6px;height:8px;overflow:hidden;">
-                    <div id="nsdProgressFill" style="height:100%;background:linear-gradient(90deg,#6366f1,#4f46e5);width:0%;transition:width .3s;"></div>
-                </div>
-                <span id="nsdProgressText" style="font-size:12px;color:#64748b;white-space:nowrap;"></span>
+        {{-- ══════════ NSD ══════════ --}}
+        <div id="nsdSection" style="display:none;">
+            <div class="nsd-layout-bar">
+                <span>Layout:</span>
+                <button class="btn-nsd-layout active" id="btnNsdLayoutSingle" onclick="switchNSDLayout('single')">👤 Single</button>
+                <button class="btn-nsd-layout"        id="btnNsdLayoutDual"   onclick="switchNSDLayout('dual')">👥 Dual (2/row)</button>
             </div>
-            <div id="nsdBulkResult" style="display:none;font-size:13px;font-weight:600;padding:4px 12px;border-radius:6px;"></div>
-            <button type="button" class="btn-bulk-save" id="btnBulkNsd" onclick="saveAllNsd()"
-                    style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
-                💾 Save All NSD
-            </button>
+
+            {{-- NSD Single layout --}}
+            <div id="nsdSingleTable" class="table-wrapper">
+                <table class="data-table" id="nsdDataTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th><th>Position</th>
+                            <th>NSD Time In (9PM+)</th><th>NSD Time Out (6AM-)</th><th>NSD Hours (Auto)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($employees as $employee)
+                        <tr data-employee-id="{{ $employee->id }}">
+                            <td class="employee-name">
+                                <div class="name-cell">
+                                    <div class="avatar">{{ strtoupper(substr($employee->first_name,0,1)) }}</div>
+                                    <div>
+                                        <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
+                                        @if(isset($attendances[$employee->id]) && $attendances[$employee->id]->nsd_updated_by)
+                                            <div class="user-stamp">✏️ {{ $attendances[$employee->id]->nsd_updated_by }} <span class="stamp-time">{{ \Carbon\Carbon::parse($attendances[$employee->id]->updated_at)->format('M d, g:i A') }}</span></div>
+                                        @else
+                                            <div class="user-stamp user-stamp-empty">— not yet saved</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ $employee->position }}</td>
+                            <td><input type="time" class="time-input nsd-time-in" data-employee="{{ $employee->id }}" value="{{ isset($attendances[$employee->id]) ? substr($attendances[$employee->id]->nsd_time_in,0,5) : '' }}" onchange="validateNSDTimeIn(this); calculateNSDHours({{ $employee->id }})"></td>
+                            <td><input type="time" class="time-input nsd-time-out" data-employee="{{ $employee->id }}" value="{{ isset($attendances[$employee->id]) ? substr($attendances[$employee->id]->nsd_time_out,0,5) : '' }}" onchange="validateNSDTimeOut(this); calculateNSDHours({{ $employee->id }})"></td>
+                            <td><input type="number" step="0.01" class="ot-input nsd-hours" data-employee="{{ $employee->id }}" placeholder="0.00" value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->nsd_hours : '' }}" readonly style="background:#f3f4f6;"></td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="5" class="no-data">No employees found for this date.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- NSD Dual layout (2 persons per row) — built by JS --}}
+            <div id="nsdDualTable" class="table-wrapper" style="display:none;">
+                <table class="data-table" id="nsdDualDataTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th><th>Position</th><th>NSD In</th><th>NSD Out</th><th>NSD Hrs</th>
+                            <th class="dual-divider">Name</th><th>Position</th><th>NSD In</th><th>NSD Out</th><th>NSD Hrs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nsdDualBody"></tbody>
+                </table>
+            </div>
         </div>
 
-        {{-- NSD TABLE --}}
-        <div id="nsdTable" class="table-wrapper" style="display:none;">
-            <table class="data-table" id="nsdDataTable">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>NSD Time In (9PM)</th>
-                        <th>NSD Time Out (6AM)</th>
-                        <th>NSD Hours (Auto)</th>
-                        <th>Day Type</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($employees as $employee)
-                    <tr data-employee-id="{{ $employee->id }}">
-                        <td class="employee-name">
-                            <div class="name-cell">
-                                <div class="avatar">{{ strtoupper(substr($employee->first_name, 0, 1)) }}</div>
-                                <div>
-                                    <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
-                                    @if(isset($attendances[$employee->id]) && $attendances[$employee->id]->nsd_updated_by)
-                                        <div class="user-stamp">
-                                            ✏️ {{ $attendances[$employee->id]->nsd_updated_by }}
-                                            <span class="stamp-time">{{ \Carbon\Carbon::parse($attendances[$employee->id]->updated_at)->format('M d, g:i A') }}</span>
-                                        </div>
-                                    @else
-                                        <div class="user-stamp user-stamp-empty">— not yet saved</div>
-                                    @endif
+        {{-- ══════════ OVERTIME ══════════ --}}
+        <div id="otSection" style="display:none;">
+            <div class="ot-layout-bar">
+                <span>Layout:</span>
+                <button class="btn-layout active" id="btnLayoutSingle" onclick="switchOTLayout('single')">👤 Single</button>
+                <button class="btn-layout"        id="btnLayoutDual"   onclick="switchOTLayout('dual')">👥 Dual (2/row)</button>
+            </div>
+
+            {{-- Single layout --}}
+            <div id="otSingleTable" class="table-wrapper">
+                <table class="data-table" id="otDataTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th><th>Position</th>
+                            <th>OT In (6-9PM)</th><th>OT Out (6-9PM)</th><th>OT Hours (Auto)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($employees as $employee)
+                        @php $att = $attendances[$employee->id] ?? null; @endphp
+                        <tr data-employee-id="{{ $employee->id }}">
+                            <td class="employee-name">
+                                <div class="name-cell">
+                                    <div class="avatar">{{ strtoupper(substr($employee->first_name,0,1)) }}</div>
+                                    <div>
+                                        <span>{{ $employee->first_name }} {{ $employee->last_name }}</span>
+                                        @if($att && $att->updated_by)
+                                            <div class="user-stamp">✏️ {{ $att->updated_by }} <span class="stamp-time">{{ \Carbon\Carbon::parse($att->updated_at)->format('M d, g:i A') }}</span></div>
+                                        @else
+                                            <div class="user-stamp user-stamp-empty">— not yet saved</div>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td>{{ $employee->position }}</td>
-                        <!-- NSD In -->
-                        <td>
-                            <input type="time" class="time-input nsd-time-in"
-                                   data-employee="{{ $employee->id }}"
-                                   min="21:00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->nsd_time_in : '' }}"
-                                   onchange="validateNSDTimeIn(this); calculateNSDHours({{ $employee->id }})">
-                        </td>
-                        <!-- NSD Out -->
-                        <td>
-                            <input type="time" class="time-input nsd-time-out"
-                                   data-employee="{{ $employee->id }}"
-                                   max="06:00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->nsd_time_out : '' }}"
-                                   onchange="validateNSDTimeOut(this); calculateNSDHours({{ $employee->id }})">
-                        </td>
-                        <!-- NSD Hours -->
-                        <td>
-                            <input type="number" step="0.01" class="ot-input nsd-hours"
-                                   data-employee="{{ $employee->id }}"
-                                   placeholder="0.00"
-                                   value="{{ isset($attendances[$employee->id]) ? $attendances[$employee->id]->nsd_hours : '' }}"
-                                   readonly style="background:#f3f4f6;">
-                        </td>
-                        <!-- Day Type -->
-                        <td>
-                            @php
-                                $att        = $attendances[$employee->id] ?? null;
-                                $hType      = $att->holiday_type ?? $holidayInfo['holiday_type'];
-                                $hName      = $att->holiday_name ?? $holidayInfo['holiday_name'];
-                                $badgeColor = match($hType) {
-                                    'regular_holiday'     => '#dc3545',
-                                    'special_non_working' => '#fd7e14',
-                                    'special_working'     => '#198754',
-                                    default               => '#6c757d',
-                                };
-                                $hLabel = match($hType) {
-                                    'regular_holiday'     => 'Reg. Holiday',
-                                    'special_non_working' => 'Sp. Non-Work',
-                                    'special_working'     => 'Sp. Working',
-                                    default               => 'Regular',
-                                };
-                            @endphp
-                            <span style="background:{{ $badgeColor }};color:white;font-size:11px;padding:3px 8px;border-radius:12px;white-space:nowrap;font-weight:600;">{{ $hLabel }}</span>
-                            @if($hName)<div style="font-size:10px;color:#6b7280;margin-top:2px;">{{ $hName }}</div>@endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="6" class="no-data">No employees found for this date.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </td>
+                            <td>{{ $employee->position }}</td>
+                            <td><input type="time" class="time-input ot-time-in" data-employee="{{ $employee->id }}" value="{{ $att && $att->ot_time_in ? substr($att->ot_time_in,0,5) : '' }}" onchange="validateOTTime(this,'OT In'); calculateOTHours({{ $employee->id }});"></td>
+                            <td><input type="time" class="time-input ot-time-out" data-employee="{{ $employee->id }}" value="{{ $att && $att->ot_time_out ? substr($att->ot_time_out,0,5) : '' }}" onchange="validateOTTime(this,'OT Out'); calculateOTHours({{ $employee->id }});"></td>
+                            <td><input type="number" step="0.01" class="ot-input ot-hours" data-employee="{{ $employee->id }}" placeholder="0.00" min="0" max="3" value="{{ $att ? $att->overtime_hours : '' }}" readonly style="background:#f3f4f6;" title="Auto-calculated from OT In/Out"></td>
+                        </tr>
+                        @empty
+                        <tr><td colspan="5" class="no-data">No employees found for this date.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Dual layout (2 persons per row) — built by JS --}}
+            <div id="otDualTable" class="table-wrapper" style="display:none;">
+                <table class="data-table" id="otDualDataTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th><th>Position</th><th>OT In</th><th>OT Out</th><th>OT Hrs</th>
+                            <th class="dual-divider">Name</th><th>Position</th><th>OT In</th><th>OT Out</th><th>OT Hrs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="otDualBody"></tbody>
+                </table>
+            </div>
         </div>
 
         {{-- Pagination --}}
@@ -435,7 +431,7 @@
             </div>
         @endif
 
-    </div><!-- end main-content -->
+    </div>
 
 <script>
     const CSRF          = document.querySelector('meta[name="csrf-token"]').content;
@@ -443,109 +439,139 @@
     const STORE_NSD     = "{{ route('timekeeper.attendance.storeNsd') }}";
     const SELECTED_DATE = "{{ $selectedDate }}";
 
+    // ═══════════ OT HOURS AUTO-CALCULATE ══════════════════
+
+    function calculateOTHours(employeeId) {
+        const otIn    = document.querySelector(`.ot-time-in[data-employee="${employeeId}"]`)?.value;
+        const otOut   = document.querySelector(`.ot-time-out[data-employee="${employeeId}"]`)?.value;
+        const hoursEl = document.querySelector(`.ot-hours[data-employee="${employeeId}"]`);
+        if (!hoursEl) return;
+        if (!otIn || !otOut) { hoursEl.value = ''; syncDualHours(employeeId, ''); return; }
+        const [inH, inM]   = otIn.split(':').map(Number);
+        const [outH, outM] = otOut.split(':').map(Number);
+        const inMins  = inH * 60 + inM;
+        const outMins = outH * 60 + outM;
+        if (outMins <= inMins) { hoursEl.value = ''; syncDualHours(employeeId, ''); return; }
+        const hrs = Math.min((outMins - inMins) / 60, 3).toFixed(2);
+        hoursEl.value = hrs;
+        syncDualHours(employeeId, hrs);
+    }
+
+    function syncDualHours(empId, val) {
+        const el = document.querySelector(`.ot-dual-hours[data-employee="${empId}"]`);
+        if (el) el.value = val;
+    }
+
+    // ═══════════ COMBINED STATUS ══════════════════════════
+
+    function updateCombinedStatus(employeeId) {
+        const today    = new Date().toISOString().split('T')[0];
+        const fallback = SELECTED_DATE < today ? 'Absent' : 'Unfilled';
+        const amIn     = document.querySelector(`.reg-time-in-am[data-employee="${employeeId}"]`)?.value;
+        const pmIn     = document.querySelector(`.reg-time-in-pm[data-employee="${employeeId}"]`)?.value;
+        let status, cls;
+        if (amIn && pmIn)         { status = 'Present';  cls = 'present'; }
+        else if (!amIn && !pmIn)  { status = fallback;   cls = fallback === 'Absent' ? 'absent' : 'unfilled'; }
+        else                      { status = 'Half Day'; cls = 'half-day'; }
+        const badge = document.querySelector(`.reg-combined-status[data-employee="${employeeId}"]`);
+        if (badge) { badge.textContent = status; badge.className = `status-badge ${cls} reg-combined-status`; badge.dataset.employee = employeeId; }
+    }
+
+    // ═══════════ DUAL TABLE BUILD & SYNC ══════════════════
+
+    function buildDualTable() {
+        const rows  = [...document.querySelectorAll('#otDataTable tbody tr[data-employee-id]')];
+        const tbody = document.getElementById('otDualBody');
+        tbody.innerHTML = '';
+        for (let i = 0; i < rows.length; i += 2) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = makeDualCells(rows[i], false) + makeDualCells(rows[i+1] || null, true);
+            tbody.appendChild(tr);
+        }
+    }
+
+    function makeDualCells(row, isDivider) {
+        if (!row) {
+            return `<td ${isDivider ? 'class="dual-divider"' : ''} colspan="5" style="background:#fafafa;"></td>`;
+        }
+        const empId = row.dataset.employeeId;
+        const name  = row.querySelector('.employee-name span')?.textContent?.trim() || '—';
+        const pos   = row.cells[1]?.textContent?.trim() || '—';
+        const otIn  = row.querySelector('.ot-time-in')?.value  || '';
+        const otOut = row.querySelector('.ot-time-out')?.value || '';
+        const otHrs = row.querySelector('.ot-hours')?.value    || '';
+        const d     = isDivider ? 'class="dual-divider"' : '';
+        return `
+            <td ${d} style="font-size:13px;font-weight:600;white-space:nowrap;">${name}</td>
+            <td style="font-size:12px;color:#6b7280;">${pos}</td>
+            <td><input type="time" class="time-input ot-dual-in" data-employee="${empId}"
+                       value="${otIn}" style="width:105px;"
+                       onchange="syncFromDual(${empId},'in',this.value);"></td>
+            <td><input type="time" class="time-input ot-dual-out" data-employee="${empId}"
+                       value="${otOut}" style="width:105px;"
+                       onchange="syncFromDual(${empId},'out',this.value);"></td>
+            <td><input type="number" step="0.01" class="ot-input ot-dual-hours" data-employee="${empId}"
+                       placeholder="0.00" value="${otHrs}" readonly style="background:#f3f4f6;width:65px;"></td>`;
+    }
+
+    function syncFromDual(empId, field, val) {
+        const sel = field === 'in' ? `.ot-time-in[data-employee="${empId}"]` : `.ot-time-out[data-employee="${empId}"]`;
+        const el  = document.querySelector(sel);
+        if (el) el.value = val;
+        calculateOTHours(empId);
+    }
+
+    function switchOTLayout(layout) {
+        if (layout === 'single') {
+            document.getElementById('otSingleTable').style.display = 'block';
+            document.getElementById('otDualTable').style.display   = 'none';
+            document.getElementById('btnLayoutSingle').classList.add('active');
+            document.getElementById('btnLayoutDual').classList.remove('active');
+        } else {
+            buildDualTable();
+            document.getElementById('otSingleTable').style.display = 'none';
+            document.getElementById('otDualTable').style.display   = 'block';
+            document.getElementById('btnLayoutDual').classList.add('active');
+            document.getElementById('btnLayoutSingle').classList.remove('active');
+        }
+    }
+
     // ═══════════ BULK SAVE — REGULAR ═══════════════════════
 
     async function saveAllRegular() {
         const rows   = document.querySelectorAll('#regularDataTable tbody tr[data-employee-id]');
         const btn    = document.getElementById('btnBulkSave');
-        const prog   = document.getElementById('saveProgressWrap');
-        const fill   = document.getElementById('saveProgressFill');
-        const text   = document.getElementById('saveProgressText');
-        const result = document.getElementById('bulkResult');
-
-        if (!rows.length) { showResult(result, 'No records to save.', false); return; }
-
-        btn.disabled         = true;
-        btn.innerHTML        = '⏳ Saving...';
-        prog.style.display   = 'flex';
-        result.style.display = 'none';
-
+        const fill   = document.getElementById('regProgressFill');
+        const text   = document.getElementById('regProgressText');
+        const prog   = document.getElementById('regProgressWrap');
+        const result = document.getElementById('regBulkResult');
+        if (!rows.length) { showResult(result,'No records to save.',false); return; }
+        btn.disabled = true; btn.innerHTML = '⏳ Saving...';
+        prog.style.display = 'flex'; result.style.display = 'none';
         const today = new Date().toISOString().split('T')[0];
         let done = 0, failed = 0, skipped = 0;
-
         for (const row of rows) {
-            const empId = row.dataset.employeeId;
-
-            const timeInAm  = row.querySelector(`.reg-time-in-am[data-employee="${empId}"]`)?.value  || null;
-            const timeOutAm = row.querySelector(`.reg-time-out-am[data-employee="${empId}"]`)?.value || null;
-            const timeInPm  = row.querySelector(`.reg-time-in-pm[data-employee="${empId}"]`)?.value  || null;
-            const timeOutPm = row.querySelector(`.reg-time-out-pm[data-employee="${empId}"]`)?.value || null;
-            const otHours   = parseFloat(row.querySelector(`.reg-ot[data-employee="${empId}"]`)?.value) || 0;
-
-            // ✅ Skip rows with no time data — don't send to server
-            if (!timeInAm && !timeOutAm && !timeInPm && !timeOutPm && otHours === 0) {
-                skipped++;
-                done++;
-                const pct = Math.round((done / rows.length) * 100);
-                fill.style.width = pct + '%';
-                text.textContent = `${done} / ${rows.length}`;
-                continue;
+            const empId     = row.dataset.employeeId;
+            const timeInAm  = row.querySelector('.reg-time-in-am')?.value  || null;
+            const timeOutAm = row.querySelector('.reg-time-out-am')?.value || null;
+            const timeInPm  = row.querySelector('.reg-time-in-pm')?.value  || null;
+            const timeOutPm = row.querySelector('.reg-time-out-pm')?.value || null;
+            if (!timeInAm && !timeOutAm && !timeInPm && !timeOutPm) {
+                skipped++; done++;
+                fill.style.width = Math.round((done/rows.length)*100)+'%'; text.textContent=`${done} / ${rows.length}`; continue;
             }
-
-            const defaultStatus   = SELECTED_DATE < today ? 'Absent' : 'Unfilled';
-            const morningStatus   = timeInAm ? 'Present' : defaultStatus;
-            const afternoonStatus = timeInPm ? 'Present' : defaultStatus;
-
+            const def = SELECTED_DATE < today ? 'Absent' : 'Unfilled';
             try {
-                const res = await fetch(STORE_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept':       'application/json',
-                    },
-                    body: JSON.stringify({
-                        employee_id:      empId,
-                        date:             SELECTED_DATE,
-                        time_in:          timeInAm,
-                        time_out:         timeOutAm,
-                        morning_status:   morningStatus,
-                        time_in_af:       timeInPm,
-                        time_out_af:      timeOutPm,
-                        afternoon_status: afternoonStatus,
-                        overtime_hours:   otHours,
-                    }),
-                });
-
-                const contentType = res.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.error(`[Row ${empId}] Non-JSON response — status: ${res.status}, url: ${res.url}`);
-                    failed++;
-                    done++;
-                    continue;
-                }
-
+                const res  = await fetch(STORE_URL, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'}, body:JSON.stringify({ employee_id:empId, date:SELECTED_DATE, time_in:timeInAm, time_out:timeOutAm, morning_status:timeInAm?'Present':def, time_in_af:timeInPm, time_out_af:timeOutPm, afternoon_status:timeInPm?'Present':def }) });
                 const json = await res.json();
-
-                if (res.ok && json.success) {
-                    row.classList.add('row-saved');
-                    setTimeout(() => row.classList.remove('row-saved'), 700);
-                } else {
-                    console.warn(`[Row ${empId}] Save failed:`, json);
-                    failed++;
-                }
-
-            } catch (err) {
-                console.error(`[Row ${empId}] Fetch error:`, err);
-                failed++;
-            }
-
-            done++;
-            const pct = Math.round((done / rows.length) * 100);
-            fill.style.width = pct + '%';
-            text.textContent = `${done} / ${rows.length}`;
+                if (res.ok && json.success) { row.classList.add('row-saved'); setTimeout(()=>row.classList.remove('row-saved'),700); }
+                else { failed++; console.warn(`[Reg ${empId}]`,json); }
+            } catch(e) { failed++; console.error(`[Reg ${empId}]`,e); }
+            done++; fill.style.width=Math.round((done/rows.length)*100)+'%'; text.textContent=`${done} / ${rows.length}`;
         }
-
-        btn.disabled       = false;
-        btn.innerHTML      = '💾 Save All Attendance';
-        prog.style.display = 'none';
-
-        const saved = done - failed - skipped;
-        if (failed === 0) {
-            showResult(result, `✅ ${saved} saved, ${skipped} skipped (no data).`, true);
-        } else {
-            showResult(result, `⚠️ ${saved} saved, ${failed} failed, ${skipped} skipped. Check console.`, false);
-        }
+        btn.disabled=false; btn.innerHTML='💾 Save All Attendance'; prog.style.display='none';
+        const saved = done-failed-skipped;
+        showResult(result, failed===0?`✅ ${saved} saved, ${skipped} skipped.`:`⚠️ ${saved} saved, ${failed} failed, ${skipped} skipped.`, failed===0);
     }
 
     // ═══════════ BULK SAVE — NSD ═══════════════════════════
@@ -553,239 +579,219 @@
     async function saveAllNsd() {
         const rows   = document.querySelectorAll('#nsdDataTable tbody tr[data-employee-id]');
         const btn    = document.getElementById('btnBulkNsd');
-        const prog   = document.getElementById('nsdProgressWrap');
         const fill   = document.getElementById('nsdProgressFill');
         const text   = document.getElementById('nsdProgressText');
+        const prog   = document.getElementById('nsdProgressWrap');
         const result = document.getElementById('nsdBulkResult');
-
-        if (!rows.length) { showResult(result, 'No records to save.', false); return; }
-
-        btn.disabled         = true;
-        btn.innerHTML        = '⏳ Saving...';
-        prog.style.display   = 'flex';
-        result.style.display = 'none';
-
-        let done = 0, failed = 0, skipped = 0;
-
+        if (!rows.length) { showResult(result,'No records to save.',false); return; }
+        btn.disabled=true; btn.innerHTML='⏳ Saving...'; prog.style.display='flex'; result.style.display='none';
+        let done=0, failed=0, skipped=0;
         for (const row of rows) {
             const empId    = row.dataset.employeeId;
-            const nsdIn    = row.querySelector(`.nsd-time-in[data-employee="${empId}"]`)?.value  || null;
-            const nsdOut   = row.querySelector(`.nsd-time-out[data-employee="${empId}"]`)?.value || null;
-            const nsdHours = parseFloat(row.querySelector(`.nsd-hours[data-employee="${empId}"]`)?.value) || 0;
-
-            // ✅ Skip rows with no NSD data
-            if (!nsdIn && !nsdOut) {
-                skipped++;
-                done++;
-                const pct = Math.round((done / rows.length) * 100);
-                fill.style.width = pct + '%';
-                text.textContent = `${done} / ${rows.length}`;
-                continue;
-            }
-
+            const nsdIn    = row.querySelector('.nsd-time-in')?.value  || null;
+            const nsdOut   = row.querySelector('.nsd-time-out')?.value || null;
+            const nsdHours = parseFloat(row.querySelector('.nsd-hours')?.value) || 0;
+            if (!nsdIn && !nsdOut) { skipped++; done++; fill.style.width=Math.round((done/rows.length)*100)+'%'; text.textContent=`${done} / ${rows.length}`; continue; }
             try {
-                const res = await fetch(STORE_NSD, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': CSRF,
-                        'Accept':       'application/json',
-                    },
-                    body: JSON.stringify({
-                        employee_id:  empId,
-                        date:         SELECTED_DATE,
-                        nsd_time_in:  nsdIn,
-                        nsd_time_out: nsdOut,
-                        nsd_hours:    nsdHours,
-                    }),
-                });
-
-                const contentType = res.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.error(`[NSD Row ${empId}] Non-JSON response — status: ${res.status}`);
-                    failed++;
-                    done++;
-                    continue;
-                }
-
+                const res  = await fetch(STORE_NSD, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'}, body:JSON.stringify({ employee_id:empId, date:SELECTED_DATE, nsd_time_in:nsdIn, nsd_time_out:nsdOut, nsd_hours:nsdHours }) });
                 const json = await res.json();
-
-                if (res.ok && json.success) {
-                    row.classList.add('row-saved');
-                    setTimeout(() => row.classList.remove('row-saved'), 700);
-                } else {
-                    console.warn(`[NSD Row ${empId}] Save failed:`, json);
-                    failed++;
-                }
-
-            } catch (err) {
-                console.error(`[NSD Row ${empId}] Fetch error:`, err);
-                failed++;
-            }
-
-            done++;
-            const pct = Math.round((done / rows.length) * 100);
-            fill.style.width = pct + '%';
-            text.textContent = `${done} / ${rows.length}`;
+                if (res.ok && json.success) { row.classList.add('row-saved'); setTimeout(()=>row.classList.remove('row-saved'),700); }
+                else { failed++; console.warn(`[NSD ${empId}]`,json); }
+            } catch(e) { failed++; console.error(`[NSD ${empId}]`,e); }
+            done++; fill.style.width=Math.round((done/rows.length)*100)+'%'; text.textContent=`${done} / ${rows.length}`;
         }
+        btn.disabled=false; btn.innerHTML='💾 Save All NSD'; prog.style.display='none';
+        const saved=done-failed-skipped;
+        showResult(result, failed===0?`✅ ${saved} NSD saved, ${skipped} skipped.`:`⚠️ ${saved} saved, ${failed} failed, ${skipped} skipped.`, failed===0);
+    }
 
-        btn.disabled       = false;
-        btn.innerHTML      = '💾 Save All NSD';
-        prog.style.display = 'none';
+    // ═══════════ BULK SAVE — OT ════════════════════════════
 
-        const saved = done - failed - skipped;
-        if (failed === 0) {
-            showResult(result, `✅ ${saved} NSD saved, ${skipped} skipped.`, true);
-        } else {
-            showResult(result, `⚠️ ${saved} saved, ${failed} failed, ${skipped} skipped. Check console.`, false);
+    async function saveAllOT() {
+        const rows   = document.querySelectorAll('#otDataTable tbody tr[data-employee-id]');
+        const btn    = document.getElementById('btnBulkOT');
+        const fill   = document.getElementById('otProgressFill');
+        const text   = document.getElementById('otProgressText');
+        const prog   = document.getElementById('otProgressWrap');
+        const result = document.getElementById('otBulkResult');
+        if (!rows.length) { showResult(result,'No records to save.',false); return; }
+        btn.disabled=true; btn.innerHTML='⏳ Saving...'; prog.style.display='flex'; result.style.display='none';
+        let done=0, failed=0, skipped=0;
+        for (const row of rows) {
+            const empId   = row.dataset.employeeId;
+            const otInEl  = row.querySelector('.ot-time-in');
+            const otOutEl = row.querySelector('.ot-time-out');
+            const otIn    = (otInEl?.value  || otInEl?.getAttribute('value')  || '').trim() || null;
+            const otOut   = (otOutEl?.value || otOutEl?.getAttribute('value') || '').trim() || null;
+            const otHours = parseFloat(row.querySelector('.ot-hours')?.value) || 0;
+            if (!otIn && !otOut) { skipped++; done++; fill.style.width=Math.round((done/rows.length)*100)+'%'; text.textContent=`${done} / ${rows.length}`; continue; }
+            try {
+                const res  = await fetch(STORE_URL, { method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':CSRF,'Accept':'application/json'}, body:JSON.stringify({ employee_id:empId, date:SELECTED_DATE, ot_time_in:otIn, ot_time_out:otOut, overtime_hours:otHours }) });
+                const json = await res.json();
+                if (res.ok && json.success) { row.classList.add('row-saved'); setTimeout(()=>row.classList.remove('row-saved'),700); }
+                else { failed++; console.warn(`[OT ${empId}]`,json); }
+            } catch(e) { failed++; console.error(`[OT ${empId}]`,e); }
+            done++; fill.style.width=Math.round((done/rows.length)*100)+'%'; text.textContent=`${done} / ${rows.length}`;
+        }
+        btn.disabled=false; btn.innerHTML='💾 Save All OT'; prog.style.display='none';
+        const saved=done-failed-skipped;
+        showResult(result, failed===0?`✅ ${saved} OT saved, ${skipped} skipped.`:`⚠️ ${saved} saved, ${failed} failed, ${skipped} skipped.`, failed===0);
+    }
+
+    // ═══════════ NSD LAYOUT TOGGLE ════════════════════════
+
+    function buildNSDDualTable() {
+        const rows  = [...document.querySelectorAll('#nsdDataTable tbody tr[data-employee-id]')];
+        const tbody = document.getElementById('nsdDualBody');
+        tbody.innerHTML = '';
+        for (let i = 0; i < rows.length; i += 2) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = makeNSDDualCells(rows[i], false) + makeNSDDualCells(rows[i+1] || null, true);
+            tbody.appendChild(tr);
         }
     }
 
-    // ═══════════ RESULT HELPER ═════════════════════════════
+    function makeNSDDualCells(row, isDivider) {
+        if (!row) {
+            return `<td ${isDivider ? 'class="dual-divider"' : ''} colspan="5" style="background:#fafafa;"></td>`;
+        }
+        const empId  = row.dataset.employeeId;
+        const name   = row.querySelector('.employee-name span')?.textContent?.trim() || '—';
+        const pos    = row.cells[1]?.textContent?.trim() || '—';
+        const nsdIn  = row.querySelector('.nsd-time-in')?.value  || '';
+        const nsdOut = row.querySelector('.nsd-time-out')?.value || '';
+        const nsdHrs = row.querySelector('.nsd-hours')?.value    || '';
+        const d      = isDivider ? 'class="dual-divider"' : '';
+        return `
+            <td ${d} style="font-size:13px;font-weight:600;white-space:nowrap;">${name}</td>
+            <td style="font-size:12px;color:#6b7280;">${pos}</td>
+            <td><input type="time" class="time-input nsd-dual-in" data-employee="${empId}"
+                       value="${nsdIn}" style="width:105px;"
+                       onchange="syncFromNSDDual(${empId},'in',this.value);"></td>
+            <td><input type="time" class="time-input nsd-dual-out" data-employee="${empId}"
+                       value="${nsdOut}" style="width:105px;"
+                       onchange="syncFromNSDDual(${empId},'out',this.value);"></td>
+            <td><input type="number" step="0.01" class="ot-input nsd-dual-hours" data-employee="${empId}"
+                       placeholder="0.00" value="${nsdHrs}" readonly style="background:#f3f4f6;width:65px;"></td>`;
+    }
+
+    function syncFromNSDDual(empId, field, val) {
+        const sel = field === 'in' ? `.nsd-time-in[data-employee="${empId}"]` : `.nsd-time-out[data-employee="${empId}"]`;
+        const el  = document.querySelector(sel);
+        if (el) { el.value = val; calculateNSDHours(empId); }
+        const dualHours = document.querySelector(`.nsd-dual-hours[data-employee="${empId}"]`);
+        const singleHours = document.querySelector(`.nsd-hours[data-employee="${empId}"]`)?.value || '';
+        if (dualHours) dualHours.value = singleHours;
+    }
+
+    function switchNSDLayout(layout) {
+        if (layout === 'single') {
+            document.getElementById('nsdSingleTable').style.display = 'block';
+            document.getElementById('nsdDualTable').style.display   = 'none';
+            document.getElementById('btnNsdLayoutSingle').classList.add('active');
+            document.getElementById('btnNsdLayoutDual').classList.remove('active');
+        } else {
+            buildNSDDualTable();
+            document.getElementById('nsdSingleTable').style.display = 'none';
+            document.getElementById('nsdDualTable').style.display   = 'block';
+            document.getElementById('btnNsdLayoutDual').classList.add('active');
+            document.getElementById('btnNsdLayoutSingle').classList.remove('active');
+        }
+    }
+
+    // ═══════════ HELPERS ═══════════════════════════════════
 
     function showResult(el, msg, ok) {
-        el.textContent   = msg;
-        el.className     = ok ? 'ok' : 'err';
-        el.style.display = 'block';
-        setTimeout(() => { el.style.display = 'none'; }, 4000);
+        el.textContent = msg; el.className = ok ? 'bulk-result ok' : 'bulk-result err';
+        el.style.display = 'block'; setTimeout(()=>{ el.style.display='none'; }, 4000);
     }
 
     // ═══════════ VALIDATION ════════════════════════════════
 
     function validateTimeRange(input, minTime, maxTime, fieldName) {
-        const time = input.value;
-        if (!time) return true;
+        const time = input.value; if (!time) return true;
         if (time < minTime || time > maxTime) {
-            input.classList.add('time-error');
-            alert(`${fieldName} must be between ${minTime} and ${maxTime}`);
-            input.value = '';
-            input.classList.remove('time-error');
-            return false;
+            input.classList.add('time-error'); alert(`${fieldName} must be between ${minTime} and ${maxTime}`);
+            input.value=''; input.classList.remove('time-error'); return false;
         }
-        input.classList.remove('time-error');
-        return true;
+        input.classList.remove('time-error'); return true;
     }
 
-    function validateOTHours(input) {
-        const hours = parseFloat(input.value);
-        if (hours > 3) { alert('OT Hours cannot exceed 3 hours (6 PM - 9 PM limit)'); input.value = '3.00'; }
-        if (hours < 0) input.value = '0.00';
+    function validateOTTime(input, fieldName) {
+        const time = input.value; if (!time) return true;
+        if (time < '17:00' || time > '21:00') {
+            input.classList.add('time-error'); alert(`${fieldName} must be between 6:00 PM (18:00) and 9:00 PM (21:00)`);
+            input.value=''; input.classList.remove('time-error'); return false;
+        }
+        input.classList.remove('time-error'); return true;
     }
 
     function validateNSDTimeIn(input) {
-        const time = input.value;
-        if (!time) return true;
-        if (time < '21:00') {
-            input.classList.add('time-error');
-            alert('NSD Time In must be 9:00 PM (21:00) or later');
-            input.value = '';
-            input.classList.remove('time-error');
-            return false;
-        }
-        input.classList.remove('time-error');
-        return true;
+        const time = input.value; if (!time) return true;
+        if (time < '21:00') { input.classList.add('time-error'); alert('NSD Time In must be 9:00 PM (21:00) or later'); input.value=''; input.classList.remove('time-error'); return false; }
+        input.classList.remove('time-error'); return true;
     }
 
     function validateNSDTimeOut(input) {
-        const time = input.value;
-        if (!time) return true;
-        if (time > '06:00') {
-            input.classList.add('time-error');
-            alert('NSD Time Out must be 6:00 AM (06:00) or earlier');
-            input.value = '';
-            input.classList.remove('time-error');
-            return false;
-        }
-        input.classList.remove('time-error');
-        return true;
+        const time = input.value; if (!time) return true;
+        if (time > '06:00') { input.classList.add('time-error'); alert('NSD Time Out must be 6:00 AM (06:00) or earlier'); input.value=''; input.classList.remove('time-error'); return false; }
+        input.classList.remove('time-error'); return true;
     }
 
     function calculateNSDHours(employeeId) {
         const timeIn  = document.querySelector(`.nsd-time-in[data-employee="${employeeId}"]`).value;
         const timeOut = document.querySelector(`.nsd-time-out[data-employee="${employeeId}"]`).value;
         const hoursEl = document.querySelector(`.nsd-hours[data-employee="${employeeId}"]`);
-        if (!timeIn || !timeOut) { hoursEl.value = ''; return; }
-        const [inH, inM]   = timeIn.split(':').map(Number);
-        const [outH, outM] = timeOut.split(':').map(Number);
-        let inDate  = new Date(); inDate.setHours(inH, inM, 0);
-        let outDate = new Date(); outDate.setHours(outH, outM, 0);
-        if (outH < inH) outDate.setDate(outDate.getDate() + 1);
-        hoursEl.value = ((outDate - inDate) / 3600000).toFixed(2);
+        if (!timeIn || !timeOut) { hoursEl.value=''; return; }
+        const [inH,inM]=[...timeIn.split(':').map(Number)], [outH,outM]=[...timeOut.split(':').map(Number)];
+        let inDate=new Date(); inDate.setHours(inH,inM,0);
+        let outDate=new Date(); outDate.setHours(outH,outM,0);
+        if (outH < inH) outDate.setDate(outDate.getDate()+1);
+        hoursEl.value = ((outDate-inDate)/3600000).toFixed(2);
     }
 
-    function setStatus(field, status) {
-        const sessionClass = field.classList.contains('status-morning') ? 'status-morning' : 'status-afternoon';
-        field.value     = status;
-        field.className = `status-display ${sessionClass} status-` + status.toLowerCase().replace(/ /g, '-');
-    }
-
-    function updateMorningStatus(input) {
-        const empId       = input.dataset.employee;
-        const statusField = document.querySelector(`.status-morning[data-employee="${empId}"]`);
-        const today       = new Date().toISOString().split('T')[0];
-        if (!input.value) { setStatus(statusField, SELECTED_DATE < today ? 'Absent' : 'Unfilled'); return; }
-        setStatus(statusField, 'Present');
-    }
-
-    function updateAfternoonStatus(input) {
-        const empId       = input.dataset.employee;
-        const statusField = document.querySelector(`.status-afternoon[data-employee="${empId}"]`);
-        const today       = new Date().toISOString().split('T')[0];
-        const row         = input.closest('tr');
-        const timeInPm    = row.querySelector(`.time-in-pm[data-employee="${empId}"]`).value;
-        if (!timeInPm) { setStatus(statusField, SELECTED_DATE < today ? 'Absent' : 'Unfilled'); return; }
-        setStatus(statusField, 'Present');
-    }
+    // ═══════════ ON LOAD ═══════════════════════════════════
 
     window.addEventListener('DOMContentLoaded', function () {
-        const today = new Date().toISOString().split('T')[0];
-        markStatusForDate(SELECTED_DATE < today ? 'Absent' : 'Unfilled');
-        document.querySelectorAll('.nsd-time-in').forEach(input => {
-            if (input.value) calculateNSDHours(input.dataset.employee);
-        });
+        document.querySelectorAll('.ot-time-in').forEach(el => { if (el.value) calculateOTHours(el.dataset.employee); });
+        document.querySelectorAll('.nsd-time-in').forEach(el => { if (el.value) calculateNSDHours(el.dataset.employee); });
+        document.querySelectorAll('.reg-time-in-am').forEach(el => updateCombinedStatus(el.dataset.employee));
     });
 
-    function markStatusForDate(defaultStatus) {
-        document.querySelectorAll('.time-in-am').forEach(input => {
-            const f = document.querySelector(`.status-morning[data-employee="${input.dataset.employee}"]`);
-            if (!f) return;
-            const cur = f.value;
-            if (cur === 'Present' && input.value) return;
-            if (cur === 'Late'    && input.value) return;
-            if (!input.value) setStatus(f, defaultStatus);
-            else updateMorningStatus(input);
-        });
-        document.querySelectorAll('.time-in-pm').forEach(input => {
-            const f = document.querySelector(`.status-afternoon[data-employee="${input.dataset.employee}"]`);
-            if (!f) return;
-            const cur = f.value;
-            if (cur === 'Present' && input.value) return;
-            if (cur === 'Late'    && input.value) return;
-            if (!input.value) setStatus(f, defaultStatus);
-            else updateAfternoonStatus(input);
-        });
-    }
+    // ═══════════ TAB TOGGLE ════════════════════════════════
 
     function showRegular() {
-        document.getElementById('regularTable').style.display  = 'block';
-        document.getElementById('bulkSaveBar').style.display   = 'flex';
-        document.getElementById('nsdTable').style.display      = 'none';
-        document.getElementById('nsdSaveBar').style.display    = 'none';
+        document.getElementById('regularTable').style.display   = 'block';
+        document.getElementById('regularSaveBar').style.display = 'flex';
+        document.getElementById('nsdSection').style.display     = 'none';
+        document.getElementById('nsdSaveBar').style.display     = 'none';
+        document.getElementById('otSection').style.display      = 'none';
+        document.getElementById('otSaveBar').style.display      = 'none';
         document.getElementById('regularBtn').classList.add('active');
         document.getElementById('nsdBtn').classList.remove('active');
+        document.getElementById('otBtn').classList.remove('active');
     }
-
     function showNsd() {
-        document.getElementById('regularTable').style.display  = 'none';
-        document.getElementById('bulkSaveBar').style.display   = 'none';
-        document.getElementById('nsdTable').style.display      = 'block';
-        document.getElementById('nsdSaveBar').style.display    = 'flex';
+        document.getElementById('regularTable').style.display   = 'none';
+        document.getElementById('regularSaveBar').style.display = 'none';
+        document.getElementById('nsdSection').style.display     = 'block';
+        document.getElementById('nsdSaveBar').style.display     = 'flex';
+        document.getElementById('otSection').style.display      = 'none';
+        document.getElementById('otSaveBar').style.display      = 'none';
         document.getElementById('nsdBtn').classList.add('active');
         document.getElementById('regularBtn').classList.remove('active');
+        document.getElementById('otBtn').classList.remove('active');
     }
-
-    function confirmLogout() {
-        if (confirm('Are you sure you want to logout?')) document.getElementById('logoutForm').submit();
+    function showOT() {
+        document.getElementById('regularTable').style.display   = 'none';
+        document.getElementById('regularSaveBar').style.display = 'none';
+        document.getElementById('nsdSection').style.display     = 'none';
+        document.getElementById('nsdSaveBar').style.display     = 'none';
+        document.getElementById('otSection').style.display      = 'block';
+        document.getElementById('otSaveBar').style.display      = 'flex';
+        document.getElementById('otBtn').classList.add('active');
+        document.getElementById('regularBtn').classList.remove('active');
+        document.getElementById('nsdBtn').classList.remove('active');
     }
 </script>
 

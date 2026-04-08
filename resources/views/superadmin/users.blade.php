@@ -44,10 +44,16 @@
         @endif
 
         <!-- CONTROLS -->
-        <form method="GET" action="{{ route('superadmin.users') }}" class="controls-bar">
-            <input type="text" name="search" class="search-input" placeholder="🔍 Search by Name"
-                value="{{ request('search') }}">
-            <select name="position" class="filter-select" onchange="this.form.submit()">
+        <div class="controls-bar">
+            <input
+                type="text"
+                id="searchUser"
+                class="search-input"
+                placeholder="🔍 Search by Name"
+                value="{{ request('search') }}"
+                autocomplete="off"
+            >
+            <select id="filterPosition" class="filter-select">
                 <option value="">Filter by Position</option>
                 @foreach($positions as $pos)
                     <option value="{{ $pos }}" {{ request('position') == $pos ? 'selected' : '' }}>
@@ -56,12 +62,12 @@
                 @endforeach
             </select>
             <label>Date:</label>
-            <input type="date" name="date" class="date-input" readonly
+            <input type="date" id="filterDate" class="date-input" readonly
                 value="{{ request('date', now()->toDateString()) }}">
             <div class="spacer"></div>
             <button type="button" class="btn-add" onclick="openModal()">➕ Add User</button>
             <button type="button" class="btn-export" onclick="alert('Export functionality')">📤 Export</button>
-        </form>
+        </div>
 
         <!-- TABLE -->
         <table>
@@ -81,40 +87,42 @@
         </table>
 
         <!-- PAGINATION -->
-        @if($users->hasPages())
-            <div class="pagination">
-                @if ($users->onFirstPage())
-                    <span class="disabled">««</span>
-                    <span class="disabled">«</span>
-                @else
-                    <a href="{{ $users->url(1) }}">««</a>
-                    <a href="{{ $users->previousPageUrl() }}">«</a>
-                @endif
-                @php
-                    $currentPage = $users->currentPage();
-                    $lastPage    = $users->lastPage();
-                    $start       = max(1, $currentPage - 2);
-                    $end         = min($lastPage, $currentPage + 2);
-                @endphp
-                @for ($page = $start; $page <= $end; $page++)
-                    @if ($page == $currentPage)
-                        <span class="active">{{ $page }}</span>
+        <div id="paginationContainer">
+            @if($users->hasPages())
+                <div class="pagination">
+                    @if ($users->onFirstPage())
+                        <span class="disabled">««</span>
+                        <span class="disabled">«</span>
                     @else
-                        <a href="{{ $users->url($page) }}">{{ $page }}</a>
+                        <a href="{{ $users->url(1) }}">««</a>
+                        <a href="{{ $users->previousPageUrl() }}">«</a>
                     @endif
-                @endfor
-                @if($end < $lastPage)
-                    <span class="disabled">...</span>
-                @endif
-                @if ($users->hasMorePages())
-                    <a href="{{ $users->nextPageUrl() }}">»</a>
-                    <a href="{{ $users->url($users->lastPage()) }}">»»</a>
-                @else
-                    <span class="disabled">»</span>
-                    <span class="disabled">»»</span>
-                @endif
-            </div>
-        @endif
+                    @php
+                        $currentPage = $users->currentPage();
+                        $lastPage    = $users->lastPage();
+                        $start       = max(1, $currentPage - 2);
+                        $end         = min($lastPage, $currentPage + 2);
+                    @endphp
+                    @for ($page = $start; $page <= $end; $page++)
+                        @if ($page == $currentPage)
+                            <span class="active">{{ $page }}</span>
+                        @else
+                            <a href="{{ $users->url($page) }}">{{ $page }}</a>
+                        @endif
+                    @endfor
+                    @if($end < $lastPage)
+                        <span class="disabled">...</span>
+                    @endif
+                    @if ($users->hasMorePages())
+                        <a href="{{ $users->nextPageUrl() }}">»</a>
+                        <a href="{{ $users->url($users->lastPage()) }}">»»</a>
+                    @else
+                        <span class="disabled">»</span>
+                        <span class="disabled">»»</span>
+                    @endif
+                </div>
+            @endif
+        </div>
 
     </div>
 
@@ -512,7 +520,7 @@
         }
 
         // ── Users data for client-side lookup ──────────────────
-        const allUsers = @json($users->items());
+        let allUsers = @json($users->items());
 
         // ── VIEW modal ─────────────────────────────────────────
         function openViewModal(userId) {
@@ -651,12 +659,35 @@
             });
         });
 
-        // ── Logout ─────────────────────────────────────────────
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                document.getElementById('logoutForm').submit();
-            }
+        // ── AJAX Search ────────────────────────────────────────
+        let searchTimer = null;
+        const searchRoute = '{{ route('superadmin.users') }}';
+
+        function doSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                const params = new URLSearchParams({
+                    search:   document.getElementById('searchUser').value,
+                    position: document.getElementById('filterPosition').value,
+                    date:     document.getElementById('filterDate').value,
+                });
+
+                fetch(`${searchRoute}?${params.toString()}`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('employeeTableBody').innerHTML = data.table;
+                    document.getElementById('paginationContainer').innerHTML = data.pagination;
+                    // Update allUsers so view/edit modals still work after search
+                    allUsers = data.users ?? allUsers;
+                })
+                .catch(err => console.error('Search error:', err));
+            }, 400);
         }
+
+        document.getElementById('searchUser').addEventListener('input', doSearch);
+        document.getElementById('filterPosition').addEventListener('change', doSearch);
     </script>
 
 @else

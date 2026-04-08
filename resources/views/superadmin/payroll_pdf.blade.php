@@ -189,11 +189,11 @@
     {{-- ── Summary Stats ── --}}
     @php
         $totalEmployees  = $employees->count();
-        $totalGross      = $employees->sum(fn($e) => (float) str_replace(',', '', $e->gross_pay   ?? 0));
-        $totalGrandTotal = $employees->sum(fn($e) => (float) str_replace(',', '', $e->grand_total ?? 0));
+        $totalGross      = $employees->sum(fn($e) => (float) str_replace(',', '', $e->net_pay   ?? 0));
+        $totalGrandTotal = $employees->sum(fn($e) => (float) str_replace(',', '', $e->gross_pay ?? 0));
         $totalCA         = $employees->sum(fn($e) => (float) str_replace(',', '', $e->cash_advance?? 0));
         $totalBasic      = $employees->sum(fn($e) => (float) str_replace(',', '', $e->basic_total ?? 0));
-        $totalOT         = $employees->sum(fn($e) => (float) str_replace(',', '', $e->ot_total    ?? 0));
+        $totalOT         = $employees->sum(fn($e) => (float) str_replace(',', '', $e->ot_regular    ?? 0));
         $totalAllowance  = $employees->sum(fn($e) => (float) str_replace(',', '', $e->allowance_total ?? 0));
         $totalRestDay    = $employees->sum(fn($e) => (float) str_replace(',', '', $e->rest_day    ?? 0));
     @endphp
@@ -238,8 +238,8 @@
                 {{-- Deductions --}}
                 <th colspan="4" style="background:#dc2626;">DEDUCTIONS</th>
                 {{-- Totals --}}
-                <th rowspan="2" style="width:8%;background:#166534;">GRAND TOTAL</th>
-                <th rowspan="2" style="width:8%;background:#15803d;">GROSS PAY</th>
+                <th rowspan="2" style="width:8%;background:#166534;">GROSS PAY</th>
+                <th rowspan="2" style="width:8%;background:#15803d;">NET PAY</th>
             </tr>
             <tr>
                 {{-- Earnings sub-headers --}}
@@ -283,8 +283,8 @@
                 <td class="{{ $isZero($emp->basic_total ?? null) ? 'zero-cell' : 'num-cell' }}">
                     {{ $emp->basic_total ?? '—' }}
                 </td>
-                <td class="{{ $isZero($emp->ot_total ?? null) ? 'zero-cell' : 'num-cell' }}">
-                    {{ $emp->ot_total ?? '—' }}
+                <td class="{{ $isZero($emp->ot_regular ?? null) ? 'zero-cell' : 'num-cell' }}">
+                    {{ $emp->ot_regular ?? '—' }}
                 </td>
                 <td class="{{ $isZero($emp->nsd_110 ?? null) ? 'zero-cell' : 'num-cell' }}">
                     {{ $emp->nsd_110 ?? '—' }}
@@ -320,8 +320,8 @@
                     {{ $emp->cash_advance ?? '—' }}
                 </td>
                 {{-- Totals --}}
-                <td class="grandtotal-cell">{{ $emp->grand_total ?? '—' }}</td>
-                <td class="gross-cell">&#8369; {{ $emp->gross_pay ?? '—' }}</td>
+                <td class="grandtotal-cell">{{ $emp->gross_pay ?? '—' }}</td>
+                <td class="gross-cell">&#8369; {{ $emp->net_pay ?? '—' }}</td>
             </tr>
             @empty
             <tr>

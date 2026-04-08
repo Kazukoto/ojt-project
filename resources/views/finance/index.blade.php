@@ -1,215 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payroll Master</title>
     <!--link rel="stylesheet" href="{{ asset('css/partials/header.css') }}"-->
     <link rel="stylesheet" href="{{ asset('css/admin/admin-index.css') }}">
-    
+    <style>
+        .dash-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            padding: 14px 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .dash-pagination a,
+        .dash-pagination span {
+            padding: 6px 11px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #374151;
+            text-decoration: none;
+            background: #fff;
+            transition: all .15s;
+        }
+        .dash-pagination a:hover      { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .dash-pagination .pg-active   { background: linear-gradient(135deg,#6366f1,#7c3aed); color: #fff; border-color: #6366f1; font-weight: 700; }
+        .dash-pagination .pg-disabled { color: #cbd5e1; background: #f8fafc; pointer-events: none; }
+
+    </style>
 </head>
 <!--@include('admin.partials.header')-->
 @if(Session::has('user_id') && Session::get('role_id') == 4)
 
 
-<body>
-    <link rel="stylesheet" href="{{ asset('css/partials/sidenav.css') }}">
-    @include('finance.partials.sidenav')
-<div class="container">
+    <body>
+        <link rel="stylesheet" href="{{ asset('css/partials/sidenav.css') }}">
+        @include('finance.partials.sidenav')
+        <div class="container">
 
-<div class="stats-content">
-<h1>Dashboard</h1>
-<!-- ===== Stats ===== -->
-<div class="stats-grid">
-    <div class="stat-card blue">
-        <div class="stat-icon">👤</div>
-        <div class="stat-info">
-            <h3>{{ number_format($totalUsers ?? 0) }}</h3>
-            <p>Total Employee</p>
-        </div>
-    </div>
+            <div class="stats-content">
+                <h1>Dashboard</h1>
+                <!-- ===== Stats ===== -->
+                <div class="stats-grid">
+                    <div class="stat-card blue">
+                        <div class="stat-icon">👤</div>
+                        <div class="stat-info">
+                            <h3>{{ number_format($totalUsers ?? 0) }}</h3>
+                            <p>Total Employee</p>
+                        </div>
+                    </div>
 
-    <div class="stat-card red">
-        <div class="stat-icon">⏰</div>
-        <div class="stat-info">
-            <h3>{{number_format($totalOvertime ?? 0)}} Hours</h3>
-            <p>Total Overtime (Monthly)</p>
-        </div>
-    </div>
+                    <div class="stat-card red">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-info">
+                            <h3>{{number_format($totalOvertime ?? 0)}} Hours</h3>
+                            <p>Total Overtime (Monthly)</p>
+                        </div>
+                    </div>
 
-    <div class="stat-card green">
-        <div class="stat-icon">👥</div>
-        <div class="stat-info">
-            <h3>{{ number_format($newEmployees ?? 0) }}</h3>
-            <p>Total New Employees (Monthly)</p>
-        </div>
-    </div>
+                    <div class="stat-card green">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-info">
+                            <h3>{{ number_format($newEmployees ?? 0) }}</h3>
+                            <p>Total New Employees (Monthly)</p>
+                        </div>
+                    </div>
 
-    <div class="stat-card orange">
-        <div class="stat-icon">💰</div>
-        <div class="stat-info">
-            <h3>₱{{ number_format($totalCashAdvance ?? 0, 2) }}</h3>
-            <p>Total Cash Advanced</p>
-        </div>
-    </div>
-</div>
-<!-- ===== Table ===== -->
-<div class="table-container">
-<table>
-<thead>
-<tr>
-    <th>EMPLOYEE NO.</th>
-    <th>NAME</th>
-    <th>GENDER</th>
-    <th>POSITION</th>
-    <th>EMPLOYMENT DATE</th>
-</tr>
-</thead>
+                    <div class="stat-card orange">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-info">
+                            <h3>₱{{ number_format($totalCashAdvance ?? 0, 2) }}</h3>
+                            <p>Total Cash Advanced</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- ===== Table ===== -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>EMPLOYEE NO.</th>
+                                <th>NAME</th>
+                                <th>GENDER</th>
+                                <th>POSITION</th>
+                                <th>EMPLOYMENT DATE</th>
+                            </tr>
+                        </thead>
 
-<tbody class="main-content">
-@forelse($employees as $employee)
-<tr class="employee-row"
-    data-id="{{ $employee->id }}"
-    data-name="{{ $employee->last_name }}, {{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->suffixes }}"
-    data-contact-number="{{ $employee->contact_number }}"
-    data-gender="{{ $employee->gender }}"
-    data-birthdate="{{ $employee->birthdate }}"
-    data-position="{{ $employee->position }}"
-    data-address="{{ $employee->house_number }} {{ $employee->purok }}, {{ $employee->barangay }}, {{ $employee->city }}, {{ $employee->province }}"
-    data-rating="{{ $employee->rating }}"
->
-    <td>{{ $employee->id }}</td>
-    <td>
-        {{ $employee->last_name }},
-        {{ $employee->first_name }}
-    </td>
-    <td>{{ $employee->gender }}</td>
-    <td>{{ $employee->position }}</td>
-    <td>{{ $employee->created_at->format('M d, Y') }}</td>
-</tr>
+                        <tbody class="main-content">
+                            @forelse($employees as $employee)
+                                <tr class="employee-row" data-id="{{ $employee->id }}"
+                                    data-name="{{ $employee->last_name }}, {{ $employee->first_name }} {{ $employee->middle_name }} {{ $employee->suffixes }}"
+                                    data-contact-number="{{ $employee->contact_number }}" data-gender="{{ $employee->gender }}"
+                                    data-birthdate="{{ $employee->birthdate }}" data-position="{{ $employee->position }}"
+                                    data-address="{{ $employee->house_number }} {{ $employee->purok }}, {{ $employee->barangay }}, {{ $employee->city }}, {{ $employee->province }}"
+                                    data-rating="{{ $employee->rating }}">
+                                    <td>{{ $employee->id }}</td>
+                                    <td>
+                                        {{ $employee->last_name }},
+                                        {{ $employee->first_name }}
+                                    </td>
+                                    <td>{{ $employee->gender }}</td>
+                                    <td>{{ $employee->position }}</td>
+                                    <td>{{ $employee->created_at->format('M d, Y') }}</td>
+                                </tr>
 
 
-@empty
-<tr>
-    <td colspan="5" style="text-align:center;">No employees found</td>
-</tr>
-@endforelse
-</tbody>
-</table>
-</div>
-<table>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="text-align:center;">No employees found</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                    @if($employees->hasPages())
+                        <div class="dash-pagination">
+                            @if($employees->onFirstPage())
+                                <span class="pg-disabled">«</span>
+                            @else
+                                <a href="{{ $employees->previousPageUrl() }}">«</a>
+                            @endif
 
-</table>
+                            @php
+                                $cur = $employees->currentPage();
+                                $last = $employees->lastPage();
+                                $from = max(1, $cur - 2);
+                                $to = min($last, $cur + 2);
+                            @endphp
 
-</div>
+                            @for($p = $from; $p <= $to; $p++)
+                                @if($p == $cur)
+                                    <span class="pg-active">{{ $p }}</span>
+                                @else
+                                    <a href="{{ $employees->url($p) }}">{{ $p }}</a>
+                                @endif
+                            @endfor
 
-<!-- ===== Modal ===== -->
-<div id="employeeModal" class="modal">
-<div class="modal-content">
+                            @if($employees->hasMorePages())
+                                <a href="{{ $employees->nextPageUrl() }}">»</a>
+                            @else
+                                <span class="pg-disabled">»</span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+                <table>
 
-<div class="modal-header">
-    <h2>Employee Details</h2>
-    <span class="close-btn">&times;</span>
-</div>
+                </table>
 
-<div class="modal-body-grid">
-    <div class="info-card full">
-        <label>Name</label>
-        <p id="modalName"></p>
-    </div>
+            </div>
 
-    <div class="info-card">
-        <label>Employee ID</label>
-        <p id="modalId"></p>
-    </div>
+            <!-- ===== Modal ===== -->
+            <div id="employeeModal" class="modal">
+                <div class="modal-content">
 
-    <div class="info-card">
-        <label>Contact Number</label>
-        <p id="modalNumber"></p>
-    </div>
+                    <div class="modal-header">
+                        <h2>Employee Details</h2>
+                        <span class="close-btn">&times;</span>
+                    </div>
 
-    <div class="info-card">
-        <label>Gender</label>
-        <p id="modalGender"></p>
-    </div>
+                    <div class="modal-body-grid">
+                        <div class="info-card full">
+                            <label>Name</label>
+                            <p id="modalName"></p>
+                        </div>
 
-    <div class="info-card">
-        <label>Birthdate</label>
-        <p id="modalBirthdate"></p>
-    </div>
+                        <div class="info-card">
+                            <label>Employee ID</label>
+                            <p id="modalId"></p>
+                        </div>
 
-    <div class="info-card">
-        <label>Position</label>
-        <p id="modalPosition"></p>
-    </div>
+                        <div class="info-card">
+                            <label>Contact Number</label>
+                            <p id="modalNumber"></p>
+                        </div>
 
-    <div class="info-card">
-        <label>Rating</label>
-        <p id="modalRating"></p>
-    </div>
+                        <div class="info-card">
+                            <label>Gender</label>
+                            <p id="modalGender"></p>
+                        </div>
 
-    <div class="info-card full">
-        <label>Address</label>
-        <p id="modalAddress"></p>
-    </div>
-</div>
+                        <div class="info-card">
+                            <label>Birthdate</label>
+                            <p id="modalBirthdate"></p>
+                        </div>
 
-</div>
-</div>
+                        <div class="info-card">
+                            <label>Position</label>
+                            <p id="modalPosition"></p>
+                        </div>
 
-<!-- ===== Script ===== -->
-<script>
-document.addEventListener("DOMContentLoaded", function(){
+                        <div class="info-card">
+                            <label>Rating</label>
+                            <p id="modalRating"></p>
+                        </div>
 
-    const modal = document.getElementById("employeeModal");
-    const closeBtn = document.querySelector(".close-btn");
+                        <div class="info-card full">
+                            <label>Address</label>
+                            <p id="modalAddress"></p>
+                        </div>
+                    </div>
 
-    const modalId = document.getElementById("modalId");
-    const modalName = document.getElementById("modalName");
-    const modalNumber = document.getElementById("modalNumber");
-    const modalGender = document.getElementById("modalGender");
-    const modalBirthdate = document.getElementById("modalBirthdate");
-    const modalPosition = document.getElementById("modalPosition");
-    const modalRating = document.getElementById("modalRating");
-    const modalAddress = document.getElementById("modalAddress");
+                </div>
+            </div>
 
-    document.querySelectorAll(".employee-row").forEach(row=>{
-        row.addEventListener("click", function(){
+            <!-- ===== Script ===== -->
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
 
-            modalId.textContent = this.dataset.id;
-            modalName.textContent = this.dataset.name || "N/A";
-            modalNumber.textContent = this.dataset.contactNumber || "N/A";
-            modalGender.textContent = this.dataset.gender;
-            modalBirthdate.textContent = this.dataset.birthdate;
-            modalPosition.textContent = this.dataset.position;
-            modalRating.textContent = this.dataset.rating;
-            modalAddress.textContent = this.dataset.address;
-            
-            modal.style.display="block";
-        });
-    });
+                    const modal = document.getElementById("employeeModal");
+                    const closeBtn = document.querySelector(".close-btn");
 
-    closeBtn.onclick = ()=> modal.style.display="none";
+                    const modalId = document.getElementById("modalId");
+                    const modalName = document.getElementById("modalName");
+                    const modalNumber = document.getElementById("modalNumber");
+                    const modalGender = document.getElementById("modalGender");
+                    const modalBirthdate = document.getElementById("modalBirthdate");
+                    const modalPosition = document.getElementById("modalPosition");
+                    const modalRating = document.getElementById("modalRating");
+                    const modalAddress = document.getElementById("modalAddress");
 
-    window.onclick = e=>{
-        if(e.target==modal){
-            modal.style.display="none";
-        }
-    };
-});
+                    document.querySelectorAll(".employee-row").forEach(row => {
+                        row.addEventListener("click", function () {
 
-function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-            document.getElementById('logoutForm').submit();
-            }
-        }
-</script>
+                            modalId.textContent = this.dataset.id;
+                            modalName.textContent = this.dataset.name || "N/A";
+                            modalNumber.textContent = this.dataset.contactNumber || "N/A";
+                            modalGender.textContent = this.dataset.gender;
+                            modalBirthdate.textContent = this.dataset.birthdate;
+                            modalPosition.textContent = this.dataset.position;
+                            modalRating.textContent = this.dataset.rating;
+                            modalAddress.textContent = this.dataset.address;
+
+                            modal.style.display = "block";
+                        });
+                    });
+
+                    closeBtn.onclick = () => modal.style.display = "none";
+
+                    window.onclick = e => {
+                        if (e.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    };
+                });
+
+                function confirmLogout() {
+                    if (confirm('Are you sure you want to logout?')) {
+                        document.getElementById('logoutForm').submit();
+                    }
+                }
+            </script>
 
 
-    @else
-    <script>
-        window.location.href = "{{ route('login') }}";
-    </script>
-@endif
+@else
+            <script>
+                window.location.href = "{{ route('login') }}";
+            </script>
+        @endif
 </body>
+
 </html>

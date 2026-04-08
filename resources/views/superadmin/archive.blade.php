@@ -497,9 +497,7 @@
             if (e.target === this) closeBulkConfirm();
         });
 
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) document.getElementById('logoutForm').submit();
-        }
+        
     </script>
 
 @else

@@ -6,7 +6,31 @@
     <title>Payroll Master</title>
     <!--link rel="stylesheet" href="{{ asset('css/partials/header.css') }}"-->
     <link rel="stylesheet" href="{{ asset('css/timekeeper/index.css') }}">
-    
+    <style>
+        .dash-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            padding: 14px 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .dash-pagination a,
+        .dash-pagination span {
+            padding: 6px 11px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #374151;
+            text-decoration: none;
+            background: #fff;
+            transition: all .15s;
+        }
+        .dash-pagination a:hover      { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .dash-pagination .pg-active   { background: linear-gradient(135deg,#6366f1,#7c3aed); color: #fff; border-color: #6366f1; font-weight: 700; }
+        .dash-pagination .pg-disabled { color: #cbd5e1; background: #f8fafc; pointer-events: none; }
+
+    </style>
 </head>
 <!--@include('admin.partials.header')-->
 @if(Session::has('user_id') && Session::get('role_id') == 3)
@@ -94,12 +118,44 @@
     <td colspan="5" style="text-align:center;">No employees found</td>
 </tr>
 @endforelse
+
+
+            </div>
+
 </tbody>
-</table>
-</div>
-<table>
 
 </table>
+@if($employees->hasPages())
+                <div class="dash-pagination">
+                    @if($employees->onFirstPage())
+                        <span class="pg-disabled">«</span>
+                    @else
+                        <a href="{{ $employees->previousPageUrl() }}">«</a>
+                    @endif
+
+                    @php
+                        $cur  = $employees->currentPage();
+                        $last = $employees->lastPage();
+                        $from = max(1, $cur - 2);
+                        $to   = min($last, $cur + 2);
+                    @endphp
+
+                    @for($p = $from; $p <= $to; $p++)
+                        @if($p == $cur)
+                            <span class="pg-active">{{ $p }}</span>
+                        @else
+                            <a href="{{ $employees->url($p) }}">{{ $p }}</a>
+                        @endif
+                    @endfor
+
+                    @if($employees->hasMorePages())
+                        <a href="{{ $employees->nextPageUrl() }}">»</a>
+                    @else
+                        <span class="pg-disabled">»</span>
+                    @endif
+                </div>
+                @endif
+</div>
 
 </div>
 
@@ -152,7 +208,9 @@
         <label>Address</label>
         <p id="modalAddress"></p>
     </div>
+    
 </div>
+
 
 </div>
 </div>

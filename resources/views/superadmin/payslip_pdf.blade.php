@@ -137,35 +137,35 @@
         <tr>
             <td class="lbl">OVERTIME RATE PER HOUR</td>
             <td class="amt">₱ {{ $overtime_rate_per_hour }}</td>
-            <td class="rlbl">REST DAY RATE PER HOUR <span class="italic-sm">(130%)</span></td>
+            <td class="rlbl">REST DAY RATE PER HOUR <span class="italic-sm">(x1.30)</span></td>
             <td class="rval">{{ $hasRestDay ? '₱ ' . $rest_day_rate_per_hour : '---' }}</td>
         </tr>
 
         <tr>
             <td class="lbl">TOTAL OVERTIME PAY</td>
             <td class="amt">₱ {{ $total_overtime_pay }}</td>
-            <td class="rlbl">REST DAY OT RATE PER HOUR <span class="italic-sm">(169%)</span></td>
+            <td class="rlbl">REST DAY OT RATE PER HOUR <span class="italic-sm">(x1.69)</span></td>
             <td class="rval">{{ $hasRestDayOT ? '₱ ' . $rest_day_ot_rate : '---' }}</td>
         </tr>
 
         <tr class="{{ $hasRestDay ? 'row-rest' : '' }}">
             <td class="lbl">REST DAY HOURS RENDERED</td>
             <td class="amt">{{ $hasRestDay ? $rest_day_hours . ' hrs' : '---' }}</td>
-            <td class="rlbl">REST DAY PAY (130%)</td>
+            <td class="rlbl">REST DAY PAY</td>
             <td class="rval">{{ $hasRestDay ? '₱ ' . $rest_day_pay : '---' }}</td>
         </tr>
 
         <tr class="{{ $hasRestDayOT ? 'row-rest' : '' }}">
             <td class="lbl">REST DAY OT HOURS</td>
             <td class="amt">{{ $hasRestDayOT ? $rest_day_ot_hours . ' hrs' : '---' }}</td>
-            <td class="rlbl">REST DAY OT PAY (169%)</td>
+            <td class="rlbl">REST DAY OT PAY</td>
             <td class="rval">{{ $hasRestDayOT ? '₱ ' . $rest_day_ot_pay : '---' }}</td>
         </tr>
 
         <tr class="{{ ($hasRegHol || $hasSpecHol) ? 'row-holiday' : '' }}">
-            <td class="lbl">REGULAR HOLIDAY PAY (200%)</td>
+            <td class="lbl">REGULAR HOLIDAY PAY (x2.0)</td>
             <td class="amt">{{ $hasRegHol ? '₱ ' . $reg_holiday_pay : '---' }}</td>
-            <td class="rlbl">SPECIAL HOLIDAY PAY (130%)</td>
+            <td class="rlbl">SPECIAL HOLIDAY PAY (x1.30)</td>
             <td class="rval">{{ $hasSpecHol ? '₱ ' . $spec_holiday_pay : '---' }}</td>
         </tr>
 
@@ -183,7 +183,7 @@
             <td colspan="2" class="divider">
                 <table width="100%" style="border-collapse:collapse;">
                     <tr>
-                        <td style="font-weight:700;font-size:11px;color:#166534;background:#dcfce7;padding:6px 10px;width:55%;">NET PAY (GRAND TOTAL)</td>
+                        <td style="font-weight:700;font-size:11px;color:#166534;background:#dcfce7;padding:6px 10px;width:55%;">GROSS PAY (GRAND TOTAL)</td>
                         <td style="font-weight:700;font-size:11px;color:#166534;background:#dcfce7;padding:6px 10px;">₱ {{ $grand_total }}</td>
                     </tr>
                 </table>
@@ -223,7 +223,7 @@
 
         {{-- Gross Pay --}}
         <tr class="row-gross">
-            <td colspan="2">GROSS PAY &nbsp;&nbsp; ₱ {{ $gross_pay }}</td>
+            <td colspan="2">NET PAY &nbsp;&nbsp; ₱ {{ $gross_pay }}</td>
             <td colspan="2" class="divider"></td>
         </tr>
 

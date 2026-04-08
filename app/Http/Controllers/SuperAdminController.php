@@ -26,7 +26,8 @@ public function index(Request $request)
 
     $employees = Employee::when($search, function ($query, $search) {
             $query->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name',  'like', "%{$search}%");
+                  ->orWhere('last_name',  'like', "%{$search}%")
+                  ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$search}%"]);
         })
         ->latest()
         ->paginate(10);
@@ -48,11 +49,10 @@ public function index(Request $request)
         })->count();
 
     // ── Employee counts ────────────────────────────────────
-    $totalUsers   = Employee::count();
-    $totalMale    = Employee::where('gender', 'Male')->count();
-    $totalFemale  = Employee::where('gender', 'Female')->count();
-    $newEmployees = Employee::where('created_at', '>=', $now->copy()->subDays(15))->count();
-
+    $totalUsers         = Employee::count();
+    $totalMale          = Employee::where('gender', 'Male')->count();
+    $totalFemale        = Employee::where('gender', 'Female')->count();
+    $newEmployees       = Employee::where('created_at', '>=', $now->copy()->subDays(15))->count();
     $lastMonthEmployees = Employee::whereBetween('created_at', [
         $now->copy()->subMonth()->startOfMonth(),
         $now->copy()->subMonth()->endOfMonth()
@@ -94,57 +94,104 @@ public function index(Request $request)
         'Timekeeper'   => 100, 'Finance'      => 100, 'Admin'        => 100,
     ];
 
-    // ── Attendance totals for cutoff ───────────────────────
-    $attendanceTotals = \App\Models\Attendance::whereBetween('date', [$cutoffStart, $cutoffEnd])
-        ->selectRaw('employee_id,
-            SUM(total_hours)    as sum_hours,
-            SUM(overtime_hours) as sum_ot,
-            SUM(nsd_hours)      as sum_nsd')
-        ->groupBy('employee_id')
+    // ── Attendance grouped per employee for cutoff ────────
+    $attendanceRecords = \App\Models\Attendance::whereBetween('date', [$cutoffStart, $cutoffEnd])
         ->get()
-        ->keyBy('employee_id');
+        ->groupBy('employee_id');
 
     // ── Cash advances for cutoff ───────────────────────────
     $cashAdvances = \App\Models\CashAdvance::where('status', 'Approved')
-        ->whereBetween('created_at', [$cutoffStart, $cutoffEnd . ' 23:59:59'])
+        ->whereBetween('created_at', [$cutoffStart . ' 00:00:00', $cutoffEnd . ' 23:59:59'])
         ->selectRaw('employee_id, SUM(amount) as total_ca')
         ->groupBy('employee_id')
         ->get()
         ->keyBy('employee_id');
 
-    // ── Payroll breakdown + gross pay ─────────────────────
-    $totalGrossPay    = 0;
-    $totalBasicPay    = 0;
-    $totalOTPay       = 0;
-    $totalAllowance   = 0;
-    $totalNetPay      = 0;   // gross - cash advances
-    $allEmployees     = Employee::all();
+    // ── Determine if 2nd cutoff for statutory deductions ──
+    $cutoffDay      = (int) \Carbon\Carbon::parse($cutoffStart)->format('d');
+    $isSecondCutoff = $cutoffDay >= 16;
+
+    // ── Payroll breakdown — mirrors SuperAdminPayrollController ──
+    $totalGrossPay  = 0;
+    $totalBasicPay  = 0;
+    $totalOTPay     = 0;
+    $totalAllowance = 0;
+    $totalNetPay    = 0;
+
+    $allEmployees = Employee::all();
 
     foreach ($allEmployees as $emp) {
-        $att        = $attendanceTotals[$emp->id] ?? null;
-        $totalHours = floatval($att->sum_hours ?? 0);
-        $totalOT    = floatval($att->sum_ot    ?? 0);
-        $totalNSD   = floatval($att->sum_nsd   ?? 0);
-        $daysWorked = $totalHours > 0 ? $totalHours / 8 : 0;
-
-        $dailyRate       = floatval($emp->rating ?? 0);
-        $hourlyRate      = $dailyRate > 0 ? $dailyRate / 8 : 0;
+        $records    = $attendanceRecords[$emp->id] ?? collect();
+        $dailyRate  = floatval($emp->rating ?? 0);
+        $hourlyRate = $dailyRate > 0 ? $dailyRate / 8 : 0;
         $allowancePerDay = floatval($allowanceMap[$emp->position] ?? 100);
 
-        $basicPay       = $hourlyRate * $totalHours;
-        $otPay          = $hourlyRate * 1.25 * $totalOT;
-        $nsdPay         = $hourlyRate * 1.10 * $totalNSD;
-        $allowanceTotal = $allowancePerDay * $daysWorked;
-        $grandTotal     = $basicPay + $otPay + $nsdPay + $allowanceTotal;
-        $ca             = floatval($cashAdvances[$emp->id]->total_ca ?? 0);
+        // Statutory deductions — only on 2nd cutoff
+        $sssDeduction        = $isSecondCutoff ? floatval($emp->sss_amount        ?? 0) : 0;
+        $philhealthDeduction = $isSecondCutoff ? floatval($emp->philhealth_amount ?? 0) : 0;
+        $pagibigDeduction    = $isSecondCutoff ? floatval($emp->pagibig_amount    ?? 0) : 0;
 
-        $empNet = max(0, $grandTotal - $ca);
+        // ── Accumulators ──────────────────────────────────
+        $totalHours       = 0;
+        $totalOT          = 0;
+        $totalNSD         = floatval($records->sum('nsd_hours'));
+        $restDayHours     = 0;
+        $restDayOT        = 0;
+        $regHolidayPay    = 0;
+        $specHolidayPay   = 0;
+        $regHolidayHours  = 0;
+        $specHolidayHours = 0;
+
+        foreach ($records as $att) {
+            $isRestDay   = \Carbon\Carbon::parse($att->date)->dayOfWeek === 0;
+            $holidayType = ($att->holiday_type !== null && $att->holiday_type !== '')
+                            ? $att->holiday_type : null;
+            $hours = floatval($att->total_hours    ?? 0);
+            $ot    = floatval($att->overtime_hours ?? 0);
+
+            if ($holidayType === 'regular_holiday') {
+                $regHolidayPay   += $hourlyRate * 2.0  * $hours;
+                $regHolidayHours += $hours;
+            } elseif ($holidayType === 'special_non_working') {
+                $specHolidayPay   += $hourlyRate * 1.30 * $hours;
+                $specHolidayHours += $hours;
+            } elseif ($holidayType === 'special_working') {
+                $totalHours += $hours;
+                $totalOT    += $ot;
+            } elseif ($isRestDay) {
+                $restDayHours += $hours;
+                $restDayOT    += $ot;
+            } else {
+                $totalHours += $hours;
+                $totalOT    += $ot;
+            }
+        }
+
+        // All worked hours including rest days — for allowance
+        $allWorkedHours = $totalHours + $regHolidayHours + $specHolidayHours + $restDayHours;
+        $daysWorked     = $allWorkedHours > 0 ? round($allWorkedHours / 8, 2) : 0;
+
+        // ── Pay computation (same as SuperAdminPayrollController) ──
+        $basicPay       = $hourlyRate * $totalHours;
+        $otTotalPay     = $hourlyRate * 1.25  * $totalOT;
+        $nsdPay         = $hourlyRate * 1.10  * $totalNSD;
+        $allowanceTotal = $allowancePerDay     * $daysWorked;
+        $restDayPay     = $hourlyRate * 1.30  * $restDayHours;
+        $restDayOTPay   = $hourlyRate * 1.69  * $restDayOT;
+
+        $grandTotal = $basicPay + $otTotalPay + $nsdPay + $allowanceTotal
+                    + $restDayPay + $restDayOTPay
+                    + $regHolidayPay + $specHolidayPay;
+
+        $ca              = floatval($cashAdvances[$emp->id]->total_ca ?? 0);
+        $totalDeductions = $sssDeduction + $philhealthDeduction + $pagibigDeduction + $ca;
+        $netPay          = max(0, $grandTotal - $totalDeductions);
 
         $totalGrossPay  += $grandTotal;
         $totalBasicPay  += $basicPay;
-        $totalOTPay     += $otPay;
+        $totalOTPay     += $otTotalPay;
         $totalAllowance += $allowanceTotal;
-        $totalNetPay    += $empNet;
+        $totalNetPay    += $netPay;
     }
 
     return view('superadmin.index', compact(
@@ -235,57 +282,53 @@ public function getGrossPay(Request $request)
         'cutoff_label'    => $cutoffLabel,
     ]);
 }
-// ============================================================
-// REPLACE users() in SuperAdminController.php
-// Uses PHP-level case-insensitive username filter to catch
-// any mismatch between users table and archives table
-// ============================================================
-
 public function users(Request $request)
 {
     $date     = $request->date ?? now()->toDateString();
     $search   = $request->search;
     $position = $request->position;
 
-    // ── Pull archived usernames, normalize to lowercase ───────
+    // Pull archived usernames once, normalized
     $archivedUsernames = Archive::whereIn('status', ['terminated', 'inactive'])
         ->pluck('username')
         ->map(fn($u) => strtolower(trim($u)))
         ->toArray();
 
-    // ── Build base query ───────────────────────────────────────
+    // Build query — filter archived users at the DB level
     $query = User::when($search, function ($q) use ($search) {
                 $q->where(function ($q2) use ($search) {
                     $q2->where('first_name', 'like', "%$search%")
-                       ->orWhere('last_name',  'like', "%$search%");
+                       ->orWhere('last_name',  'like', "%$search%")
+                       ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%$search%"])
+                       ->orWhere('username', 'like', "%$search%");
                 });
             })
             ->when($position, function ($q) use ($position) {
                 $q->where('position', $position);
             })
+            ->when(!empty($archivedUsernames), function ($q) use ($archivedUsernames) {
+                // Filter at DB level using LOWER() to handle case mismatch
+                $q->whereRaw('LOWER(TRIM(username)) NOT IN (' .
+                    implode(',', array_fill(0, count($archivedUsernames), '?')) . ')',
+                    $archivedUsernames
+                );
+            })
             ->orderBy('id');
 
-    // ── Filter out archived users in PHP (handles case mismatch) ──
-    $allUsers = $query->get()->filter(
-        fn($u) => !in_array(strtolower(trim($u->username)), $archivedUsernames)
-    )->values();
+    // Paginate at DB level — much more efficient
+    $users = $query->paginate(10)->withQueryString();
 
-    // ── Manual pagination ──────────────────────────────────────
-    $page    = (int) $request->get('page', 1);
-    $perPage = 15;
-    $users   = new \Illuminate\Pagination\LengthAwarePaginator(
-        $allUsers->forPage($page, $perPage),
-        $allUsers->count(),
-        $perPage,
-        $page,
-        ['path' => $request->url(), 'query' => $request->query()]
-    );
-
-    // ── Positions dropdown ─────────────────────────────────────
     $positions = User::select('position')->distinct()->pluck('position')->filter();
+    $projects  = \App\Models\Project::orderBy('name')->get();
+    $roles     = \App\Models\Role::orderBy('role_name')->get();
 
-    $projects = \App\Models\Project::orderBy('name')->get();
-    $roles    = \App\Models\Role::orderBy('role_name')->get();
+    // Return JSON for AJAX search requests
+    if ($request->ajax()) {
+        return response()->json([
+            'table' => view('superadmin.partials.user', ['users' => $users])->render(),
+            'pagination' => view('superadmin.partials.pagination', ['users' => $users])->render(),
+        ]);
+    }
 
     return view('superadmin.users', compact(
         'users', 'positions', 'date', 'projects', 'roles'
@@ -1100,7 +1143,7 @@ public function storeAttendance(Request $request)
 
     // Safely null out empty string time fields
     $nullFields = [];
-    foreach (['time_in', 'time_out', 'time_in_af', 'time_out_af'] as $field) {
+    foreach (['time_in', 'time_out', 'time_in_af', 'time_out_af', 'ot_time_in', 'ot_time_out'] as $field) {
         if ($request->has($field) && $request->input($field) === '') {
             $nullFields[$field] = null;
         }
@@ -1110,7 +1153,7 @@ public function storeAttendance(Request $request)
     }
 
     // Trim seconds off time values
-    foreach (['time_in', 'time_out', 'time_in_af', 'time_out_af'] as $field) {
+    foreach (['time_in', 'time_out', 'time_in_af', 'time_out_af', 'ot_time_in', 'ot_time_out'] as $field) {
         if ($request->filled($field)) {
             $request->merge([$field => substr($request->input($field), 0, 5)]);
         }
@@ -1125,7 +1168,9 @@ public function storeAttendance(Request $request)
         'time_in_af'       => 'nullable|date_format:H:i',
         'time_out_af'      => 'nullable|date_format:H:i',
         'afternoon_status' => 'nullable|in:Present,Absent,Unfilled,Late,Early Out',
-        'overtime_hours'   => 'nullable|numeric|min:0|max:3',
+        'ot_time_in'       => 'nullable|date_format:H:i',
+        'ot_time_out'      => 'nullable|date_format:H:i',
+        'overtime_hours'   => 'nullable|numeric|min:0|max:4',
         'remarks'          => 'nullable|string',
     ]);
 
@@ -1135,31 +1180,37 @@ public function storeAttendance(Request $request)
 
     // Time range validation
     $errors = [];
-    if ($request->time_in && ($request->time_in < '08:00' || $request->time_in > '12:00'))
-        $errors['time_in'] = 'AM Time In must be between 08:00 and 12:00';
-    if ($request->time_out && ($request->time_out < '08:00' || $request->time_out > '12:00'))
-        $errors['time_out'] = 'AM Time Out must be between 08:00 and 12:00';
+    if ($request->time_in && ($request->time_in < '07:00' || $request->time_in > '12:00'))
+        $errors['time_in'] = 'AM Time In must be between 07:00 and 12:00';
+    if ($request->time_out && ($request->time_out < '07:00' || $request->time_out > '12:00'))
+        $errors['time_out'] = 'AM Time Out must be between 07:00 and 12:00';
     if ($request->time_in_af && ($request->time_in_af < '13:00' || $request->time_in_af > '17:00'))
         $errors['time_in_af'] = 'PM Time In must be between 13:00 and 17:00';
     if ($request->time_out_af && ($request->time_out_af < '13:00' || $request->time_out_af > '17:00'))
         $errors['time_out_af'] = 'PM Time Out must be between 13:00 and 17:00';
+    if ($request->ot_time_in && ($request->ot_time_in < '17:00' || $request->ot_time_in > '21:00'))
+        $errors['ot_time_in'] = 'OT Time In must be between 17:00 and 21:00';
+    if ($request->ot_time_out && ($request->ot_time_out < '17:00' || $request->ot_time_out > '21:00'))
+        $errors['ot_time_out'] = 'OT Time Out must be between 17:00 and 21:00';
 
     if (!empty($errors)) {
         return response()->json(['success' => false, 'errors' => $errors], 422);
     }
 
-    $hasTimeData     = $request->time_in || $request->time_out || $request->time_in_af || $request->time_out_af;
-    $hasOT           = $request->overtime_hours && $request->overtime_hours > 0;
-    $existingRecord  = Attendance::where('employee_id', $request->employee_id)
-                                 ->whereDate('date', $request->date)
-                                 ->first();
+    $hasTimeData    = $request->time_in || $request->time_out || $request->time_in_af || $request->time_out_af;
+    $hasOT          = ($request->overtime_hours && $request->overtime_hours > 0)
+                   || $request->ot_time_in
+                   || $request->ot_time_out;
+    $existingRecord = Attendance::where('employee_id', $request->employee_id)
+                                ->whereDate('date', $request->date)
+                                ->first();
 
-    // ✅ Skip rows with no time data and no existing record — prevents blank overwrites
+    // Skip rows with no time data and no existing record — prevents blank overwrites
     if (!$hasTimeData && !$hasOT && !$existingRecord) {
         return response()->json(['success' => true, 'message' => 'Skipped — no data.']);
     }
 
-    $totalHours  = Attendance::calculateTotalHours(
+    $totalHours = Attendance::calculateTotalHours(
         $request->time_in,
         $request->time_out,
         $request->time_in_af,
@@ -1179,7 +1230,6 @@ public function storeAttendance(Request $request)
         $afternoonStatus = $request->time_in_af ? 'Present' : 'Absent';
     }
 
-    // ✅ If existing record, preserve its data where new data is null
     $updateData = [
         'time_in'          => $request->time_in          ?: ($existingRecord->time_in          ?? null),
         'time_out'         => $request->time_out         ?: ($existingRecord->time_out         ?? null),
@@ -1188,6 +1238,8 @@ public function storeAttendance(Request $request)
         'time_out_af'      => $request->time_out_af      ?: ($existingRecord->time_out_af      ?? null),
         'afternoon_status' => $afternoonStatus,
         'overtime_hours'   => $request->overtime_hours   ?: ($existingRecord->overtime_hours   ?? 0),
+        'ot_time_in'       => $request->ot_time_in       ?: ($existingRecord->ot_time_in       ?? null),
+        'ot_time_out'      => $request->ot_time_out      ?: ($existingRecord->ot_time_out      ?? null),
         'total_hours'      => $totalHours,
         'remarks'          => $request->remarks          ?? ($existingRecord->remarks          ?? null),
         'holiday_type'     => $holidayInfo['holiday_type'],
@@ -1756,7 +1808,7 @@ public function updateUserStatus(Request $request, $id)
                 $archived->first_name,     $archived->middle_name,    $archived->last_name,
                 $archived->suffixes,       $archived->contact_number, $archived->birthdate,
                 $archived->gender,         $archived->position,       $archived->rating,
-                $archived->username,       $archived->password,       $archived->photo, // ✅
+                $archived->username,       $archived->password,       $archived->photo,
                 $archived->house_number,   $archived->purok,          $archived->barangay,
                 $archived->city,           $archived->province,       $archived->zip_code,
                 $archived->sss,            $archived->philhealth,     $archived->pagibig,
@@ -1782,7 +1834,7 @@ public function updateUserStatus(Request $request, $id)
                 'status'            => 'active',
                 'username'          => $archived->username,
                 'password'          => $archived->password,
-                'photo'             => $archived->photo, // ✅
+                'photo'             => $archived->photo,
                 'house_number'      => $archived->house_number,
                 'purok'             => $archived->purok,
                 'barangay'          => $archived->barangay,
@@ -1809,6 +1861,17 @@ public function updateUserStatus(Request $request, $id)
 
         $archived->delete();
 
+        // Restore user back into users table
+        User::create([
+            'role_id'     => $archived->role_id,
+            'first_name'  => $archived->first_name,
+            'middle_name' => $archived->middle_name,
+            'last_name'   => $archived->last_name,
+            'position'    => $archived->position,
+            'username'    => $archived->username,
+            'password'    => $archived->password,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => "{$user->first_name} {$user->last_name} has been restored. They can now log in.",
@@ -1832,7 +1895,7 @@ public function updateUserStatus(Request $request, $id)
             'gender'            => $employee?->gender,
             'position'          => $employee?->position    ?? $user->position,
             'rating'            => $employee?->rating,
-            'photo'             => $employee?->photo,       // ✅ preserve photo
+            'photo'             => $employee?->photo,
             'house_number'      => $employee?->house_number,
             'purok'             => $employee?->purok,
             'barangay'          => $employee?->barangay,
@@ -1861,9 +1924,13 @@ public function updateUserStatus(Request $request, $id)
             'archived_at'       => now(),
         ]);
 
+        // Delete from employees table
         if ($employee) {
             $employee->delete();
         }
+
+        // Delete from users table too
+        $user->delete();
 
         $statusText = ucfirst($status);
         return response()->json([

@@ -168,52 +168,65 @@ class PayrollMasterController extends Controller
     // SHOW PAYROLL PAGE
     // =========================================================
     public function showPayroll(Request $request)
-    {
-        $start    = $request->start_date ?? now()->startOfMonth()->toDateString();
-        $end      = $request->end_date   ?? now()->startOfMonth()->addDays(14)->toDateString();
-        $search   = $request->search;
-        $position = $request->position;
-        $sortBy   = $request->sort_by  ?? null;
-        $sortDir  = $request->sort_dir ?? 'asc';
+{
+    $start    = $request->start_date ?? now()->startOfMonth()->toDateString();
+    $end      = $request->end_date   ?? now()->startOfMonth()->addDays(14)->toDateString();
+    $search   = $request->search;
+    $position = $request->position;
+    $sortBy   = $request->sort_by  ?? null;
+    $sortDir  = $request->sort_dir ?? 'asc';
 
-        $allCalculated = $this->calculatePayroll($start, $end, $search, $position);
+    // Calculate ALL employees (no search/position filter) for accurate stats
+    $allForStats = $this->calculatePayroll($start, $end);
 
-        if ($sortBy) {
-            $allCalculated = $allCalculated->sortBy(function ($emp) use ($sortBy) {
-                if ($sortBy === 'name')            return strtolower(($emp->last_name ?? '') . ' ' . ($emp->first_name ?? ''));
-                if ($sortBy === 'allowance_total') return floatval($emp->allowance_total ?? 0);
-                if ($sortBy === 'basic_total')     return floatval($emp->basic_total     ?? 0);
-                if ($sortBy === 'ot_total')        return floatval($emp->ot_total        ?? 0);
-                if ($sortBy === 'grand_total')     return floatval($emp->grand_total     ?? 0);
-                if ($sortBy === 'cash_advance')    return floatval($emp->cash_advance    ?? 0);
-                if ($sortBy === 'gross_pay')       return floatval($emp->gross_pay       ?? 0);
-                return strtolower($emp->last_name ?? '');
-            }, SORT_REGULAR, $sortDir === 'desc')->values();
-        }
+    $stats = [
+        'total_gross'      => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->gross_pay    ?? 0))),
+        'total_basic'      => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->basic_total  ?? 0))),
+        'total_ot'         => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->ot_25        ?? 0))),
+        'total_allowance'  => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->allowance_total ?? 0))),
+        'total_deductions' => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->total_deductions ?? 0))),
+        'total_net'        => $allForStats->sum(fn($e) => floatval(str_replace(',', '', $e->net_pay      ?? 0))),
+        'employee_count'   => $allForStats->count(),
+    ];
 
-        $perPage     = 15;
-        $currentPage = (int) ($request->page ?? 1);
-        $total       = $allCalculated->count();
-        $items       = $allCalculated->slice(($currentPage - 1) * $perPage, $perPage)->values();
+    $allCalculated = $this->calculatePayroll($start, $end, $search, $position);
 
-        $employees = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $currentPage,
-            ['path' => $request->url(), 'query' => $request->query()]
-        );
-
-        $positions = Employee::select('position')
-            ->distinct()
-            ->whereNotNull('position')
-            ->pluck('position');
-
-        $startDate = $start;
-        $endDate   = $end;
-
-        return view('admin.payroll', compact('employees', 'positions', 'startDate', 'endDate'));
+    if ($sortBy) {
+        $allCalculated = $allCalculated->sortBy(function ($emp) use ($sortBy) {
+            if ($sortBy === 'name')            return strtolower(($emp->last_name ?? '') . ' ' . ($emp->first_name ?? ''));
+            if ($sortBy === 'allowance_total') return floatval(str_replace(',', '', $emp->allowance_total ?? 0));
+            if ($sortBy === 'basic_total')     return floatval(str_replace(',', '', $emp->basic_total     ?? 0));
+            if ($sortBy === 'ot_total')        return floatval(str_replace(',', '', $emp->ot_total        ?? 0));
+            if ($sortBy === 'grand_total')     return floatval(str_replace(',', '', $emp->grand_total     ?? 0));
+            if ($sortBy === 'cash_advance')    return floatval(str_replace(',', '', $emp->cash_advance    ?? 0));
+            if ($sortBy === 'gross_pay')       return floatval(str_replace(',', '', $emp->gross_pay       ?? 0));
+            return strtolower($emp->last_name ?? '');
+        }, SORT_REGULAR, $sortDir === 'desc')->values();
     }
+
+    $perPage     = 15;
+    $currentPage = (int) ($request->page ?? 1);
+    $total       = $allCalculated->count();
+    $items       = $allCalculated->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+    $employees = new \Illuminate\Pagination\LengthAwarePaginator(
+        $items,
+        $total,
+        $perPage,
+        $currentPage,
+        ['path' => $request->url(), 'query' => $request->query()]
+    );
+
+    $positions = Employee::select('position')
+        ->distinct()
+        ->whereNotNull('position')
+        ->pluck('position');
+
+    $startDate = $start;
+    $endDate   = $end;
+
+    return view('admin.payroll', compact('employees', 'positions', 'startDate', 'endDate', 'stats'));
+}
     // =========================================================
     // PAYSLIP
     // =========================================================

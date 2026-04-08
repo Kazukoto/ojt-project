@@ -695,9 +695,7 @@
             setTimeout(() => { el.style.display = 'none'; }, 4000);
         }
 
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) document.getElementById('logoutForm').submit();
-        }
+        
     </script>
 
 @else

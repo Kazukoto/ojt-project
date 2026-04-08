@@ -90,7 +90,7 @@
             color: #6366f1;
             transition: all .15s;
         }
-        .cutoff-btn.active  { background: #6366f1; color: #fff; }
+        .cutoff-btn.active   { background: #6366f1; color: #fff; }
         .cutoff-btn:disabled { opacity: .5; cursor: not-allowed; }
         #payrollLoading { display: none; font-size: 11px; color: #9ca3af; margin-top: 4px; }
         #payrollLoading.show { display: block; }
@@ -154,8 +154,8 @@
             background: #fff;
             transition: all .15s;
         }
-        .dash-pagination a:hover { background: #6366f1; color: #fff; border-color: #6366f1; }
-        .dash-pagination .pg-active { background: linear-gradient(135deg,#6366f1,#7c3aed); color: #fff; border-color: #6366f1; font-weight: 700; }
+        .dash-pagination a:hover      { background: #6366f1; color: #fff; border-color: #6366f1; }
+        .dash-pagination .pg-active   { background: linear-gradient(135deg,#6366f1,#7c3aed); color: #fff; border-color: #6366f1; font-weight: 700; }
         .dash-pagination .pg-disabled { color: #cbd5e1; background: #f8fafc; pointer-events: none; }
 
         /* ── Charts column ── */
@@ -163,7 +163,6 @@
             display: flex; flex-direction: column; gap: 18px;
             animation: fadeUp 0.5s ease .3s both;
         }
-
         .chart-card {
             background: #fff; border-radius: 14px;
             padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);
@@ -184,30 +183,6 @@
         .legend-dot   { width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; }
         .legend-val   { font-weight: 700; color: #1e293b; }
 
-        /* ── Modal ── */
-        .modal {
-            display: none; position: fixed; inset: 0;
-            background: rgba(15,10,40,0.55); z-index: 9999;
-            backdrop-filter: blur(4px); justify-content: center; align-items: center;
-        }
-        .modal.open { display: flex; }
-        .modal-content {
-            background: #fff; width: 420px; border-radius: 16px;
-            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.22);
-            animation: modalFade .22s ease;
-        }
-        .modal-header {
-            background: linear-gradient(135deg, #6366f1, #7c3aed); color: #fff;
-            padding: 18px 22px; display: flex; justify-content: space-between; align-items: center;
-        }
-        .modal-header h2 { font-size: 18px; margin: 0; }
-        .close-btn { font-size: 22px; cursor: pointer; background: none; border: none; color: #fff; line-height: 1; }
-        .modal-body-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
-        .info-card { background: #f8fafc; padding: 12px 14px; border-radius: 10px; }
-        .info-card label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; }
-        .info-card p     { margin: 4px 0 0; font-weight: 600; color: #1e293b; font-size: 14px; }
-        .info-card.full  { grid-column: span 2; }
-
         /* ── Animations ── */
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(16px); }
@@ -218,9 +193,7 @@
             to   { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        @media (max-width: 1200px) {
-            .stats-grid { grid-template-columns: repeat(3, 1fr); }
-        }
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 1100px) {
             .bottom-section { grid-template-columns: 1fr; }
             .charts-column  { flex-direction: row; flex-wrap: wrap; }
@@ -237,16 +210,17 @@
 
 @if(Session::has('user_id') && Session::get('role_id') == 1)
 
+    {{-- Sidenav (includes logout modal + script) --}}
     @include('superadmin.partials.sidenav')
 
     <div class="main-content">
 
         <h1 class="page-heading">📊 Dashboard</h1>
 
-        <!-- ══ Stats Grid (6 cards, 3 columns) ══ -->
+        <!-- ══ Stats Grid ══ -->
         <div class="stats-grid">
 
-            {{-- 2. Gross Pay (AJAX toggle) --}}
+            {{-- Gross Pay (AJAX toggle) --}}
             <div class="stat-card" id="payrollStatCard">
                 <div class="stat-icon">💰</div>
                 <div class="payroll-body">
@@ -263,17 +237,17 @@
                 </div>
             </div>
 
-            {{-- 3. Net Pay This Period --}}
+            {{-- Net Pay --}}
             <div class="stat-card">
                 <div class="stat-icon">💵</div>
                 <div class="stat-info">
                     <h3>₱{{ number_format($totalNetPay ?? 0, 2) }}</h3>
                     <p>Net Pay This Period</p>
-                    <small>After cash advances</small>
+                    <small>After deductions</small>
                 </div>
             </div>
 
-            {{-- 4. Total Cash Advanced --}}
+            {{-- Total Cash Advanced --}}
             <div class="stat-card">
                 <div class="stat-icon">💳</div>
                 <div class="stat-info">
@@ -283,7 +257,7 @@
                 </div>
             </div>
 
-            {{-- 5. Total Present Today --}}
+            {{-- Present Today --}}
             <div class="stat-card">
                 <div class="stat-icon">✅</div>
                 <div class="stat-info">
@@ -351,7 +325,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                <!-- Pagination -->
+
                 @if($employees->hasPages())
                 <div class="dash-pagination">
                     @if($employees->onFirstPage())
@@ -386,6 +360,7 @@
 
             <!-- Charts Column -->
             <div class="charts-column">
+
                 <!-- Employees by Position -->
                 <div class="chart-card">
                     <h3>🏗️ Employees by Position</h3>
@@ -396,7 +371,7 @@
                             <div class="small">Total</div>
                         </div>
                     </div>
-                    <div class="chart-legend" id="positionLegend">
+                    <div class="chart-legend">
                         @foreach($positionCounts->take(6) as $pos)
                         <div class="legend-item">
                             <div class="legend-left">
@@ -439,17 +414,17 @@
         </div>
     </div>
 
-    <!-- Employee View Modal -->
-    <div id="viewUserModal" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(15,10,40,.55);z-index:9999;backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center;padding:20px;">
-        <div class="modal-box" style="max-width:780px;padding:0;overflow:hidden;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.22);width:100%;position:relative;animation:modalFade .22s ease;">
-            <button class="modal-close" style="position:absolute;top:14px;right:16px;z-index:10;width:32px;height:32px;border:none;border-radius:50%;background:#f1f5f9;color:#475569;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="closeViewUserModal()">✕</button>
+    {{-- ── Employee View Modal ── --}}
+    <div id="viewUserModal" style="display:none;position:fixed;inset:0;background:rgba(15,10,40,.55);z-index:9999;backdrop-filter:blur(4px);justify-content:center;align-items:center;padding:20px;">
+        <div style="max-width:780px;padding:0;overflow:hidden;background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.22);width:100%;position:relative;animation:modalFade .22s ease;">
+            <button style="position:absolute;top:14px;right:16px;z-index:10;width:32px;height:32px;border:none;border-radius:50%;background:#f1f5f9;color:#475569;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="closeViewUserModal()">✕</button>
             <div style="display:flex;align-items:center;gap:24px;padding:28px 32px 20px;border-bottom:1px solid #f0f0f0;">
                 <div id="profileAvatar" style="width:90px;height:90px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:700;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.35);overflow:hidden;">
                     <span id="profileInitial">?</span>
                     <img id="profileImg" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div>
-                    <div id="viewFullName" style="font-size:22px;font-weight:700;color:#1e293b;margin-bottom:4px;"></div>
+                    <div id="viewFullName"  style="font-size:22px;font-weight:700;color:#1e293b;margin-bottom:4px;"></div>
                     <div id="viewRoleBadge" style="display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.4px;background:#ede9fe;color:#4f46e5;"></div>
                 </div>
             </div>
@@ -482,47 +457,38 @@
     <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        // ── Employee row → view modal ───────────────────────
+        // ── Employee row → view modal ──────────────────────
         document.querySelectorAll(".employee-row").forEach(row => {
             row.addEventListener("click", function () {
                 const d = this.dataset;
 
-                // Avatar initial
-                document.getElementById('profileInitial').textContent = (d.firstName || '?').charAt(0).toUpperCase();
-                document.getElementById('profileImg').style.display   = 'none';
-                document.getElementById('profileInitial').style.display = '';
-
-                // Header
-                document.getElementById('viewFullName').textContent  = d.name || 'N/A';
-                document.getElementById('viewRoleBadge').textContent = d.position || 'N/A';
-
-                // Personal info
-                document.getElementById('viewBirthdate').textContent = d.birthdate  || '—';
-                document.getElementById('viewGender').textContent    = d.gender     || '—';
-                document.getElementById('viewContact').textContent   = d.contactNumber || '—';
-                document.getElementById('viewUsername').textContent  = d.username   || '—';
-                document.getElementById('viewAddress').textContent   = d.address    || '—';
-
-                // Government IDs
-                document.getElementById('viewSss').textContent       = d.sss        || '—';
-                document.getElementById('viewPhilhealth').textContent = d.philhealth || '—';
-                document.getElementById('viewPagibig').textContent   = d.pagibig    || '—';
-
-                // Emergency contact
-                document.getElementById('viewEcName').textContent    = d.ecName     || '—';
-                document.getElementById('viewEcContact').textContent = d.ecContact  || '—';
-                document.getElementById('viewEcEmail').textContent   = d.ecEmail    || '—';
-                document.getElementById('viewEcAddress').textContent = d.ecAddress  || '—';
+                document.getElementById('profileInitial').textContent      = (d.firstName || '?').charAt(0).toUpperCase();
+                document.getElementById('profileImg').style.display        = 'none';
+                document.getElementById('profileInitial').style.display    = '';
+                document.getElementById('viewFullName').textContent        = d.name         || 'N/A';
+                document.getElementById('viewRoleBadge').textContent       = d.position     || 'N/A';
+                document.getElementById('viewBirthdate').textContent       = d.birthdate    || '—';
+                document.getElementById('viewGender').textContent          = d.gender       || '—';
+                document.getElementById('viewContact').textContent         = d.contactNumber|| '—';
+                document.getElementById('viewUsername').textContent        = d.username     || '—';
+                document.getElementById('viewAddress').textContent         = d.address      || '—';
+                document.getElementById('viewSss').textContent             = d.sss          || '—';
+                document.getElementById('viewPhilhealth').textContent      = d.philhealth   || '—';
+                document.getElementById('viewPagibig').textContent         = d.pagibig      || '—';
+                document.getElementById('viewEcName').textContent          = d.ecName       || '—';
+                document.getElementById('viewEcContact').textContent       = d.ecContact    || '—';
+                document.getElementById('viewEcEmail').textContent         = d.ecEmail      || '—';
+                document.getElementById('viewEcAddress').textContent       = d.ecAddress    || '—';
 
                 document.getElementById('viewUserModal').style.display = 'flex';
             });
         });
 
-        // ── Employees by Position Donut ─────────────────────
+        // ── Employees by Position Donut ────────────────────
         @php
-            $posLabels  = $positionCounts->take(6)->pluck('position')->toJson();
-            $posData    = $positionCounts->take(6)->pluck('total')->toJson();
-            $posColors  = $positionCounts->take(6)->map(function($p, $i) {
+            $posLabels = $positionCounts->take(6)->pluck('position')->toJson();
+            $posData   = $positionCounts->take(6)->pluck('total')->toJson();
+            $posColors = $positionCounts->take(6)->map(function($p, $i) {
                 $hues = [240, 210, 160, 40, 280, 340];
                 return 'hsl(' . ($hues[$i % count($hues)]) . ', 65%, 58%)';
             })->toJson();
@@ -535,30 +501,24 @@
                 datasets: [{
                     data: {!! $posData !!},
                     backgroundColor: {!! $posColors !!},
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                    hoverOffset: 6,
+                    borderWidth: 2, borderColor: '#fff', hoverOffset: 6,
                 }]
             },
             options: {
                 cutout: '68%',
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ${ctx.parsed} employees`
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} employees` } }
                 },
                 animation: { animateRotate: true, duration: 900, delay: 300 }
             }
         });
 
-        // ── Payroll Breakdown Donut ─────────────────────────
-        const basicPay    = {{ round($totalBasicPay ?? 0) }};
-        const otPay       = {{ round($totalOTPay ?? 0) }};
-        const allowance   = {{ round($totalAllowance ?? 0) }};
-        const hasPayroll  = basicPay + otPay + allowance > 0;
+        // ── Payroll Breakdown Donut ────────────────────────
+        const basicPay  = {{ round($totalBasicPay  ?? 0) }};
+        const otPay     = {{ round($totalOTPay     ?? 0) }};
+        const allowance = {{ round($totalAllowance ?? 0) }};
+        const hasPayroll = basicPay + otPay + allowance > 0;
 
         new Chart(document.getElementById('payrollChart'), {
             type: 'doughnut',
@@ -567,28 +527,26 @@
                 datasets: [{
                     data: hasPayroll ? [basicPay, otPay, allowance] : [1, 0, 0],
                     backgroundColor: hasPayroll ? ['#6366f1', '#f59e0b', '#10b981'] : ['#e2e8f0'],
-                    borderWidth: 2,
-                    borderColor: '#fff',
-                    hoverOffset: 6,
+                    borderWidth: 2, borderColor: '#fff', hoverOffset: 6,
                 }]
             },
             options: {
                 cutout: '68%',
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: ctx => ` ${ctx.label}: ₱${ctx.parsed.toLocaleString()}`
-                        }
-                    }
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ₱${ctx.parsed.toLocaleString()}` } }
                 },
                 animation: { animateRotate: true, duration: 900, delay: 450 }
             }
         });
 
+        // ── Close modals on backdrop click ────────────────
+        document.getElementById('viewUserModal').addEventListener('click', function(e) {
+            if (e.target === this) closeViewUserModal();
+        });
     });
 
-    // ── AJAX payroll cutoff toggle ──────────────────────────
+    // ── AJAX payroll cutoff toggle ─────────────────────────
     function loadPayroll(cutoff) {
         const btn1    = document.getElementById('btnFirst');
         const btn2    = document.getElementById('btnSecond');
@@ -623,19 +581,6 @@
     function closeViewUserModal() {
         document.getElementById('viewUserModal').style.display = 'none';
     }
-
-    // Close on backdrop click
-    document.getElementById('viewUserModal').addEventListener('click', function(e) {
-        if (e.target === this) closeViewUserModal();
-    });
-
-    function confirmLogout() {
-        if (confirm('Are you sure you want to logout?')) {
-            document.getElementById('logoutForm').submit();
-        }
-    }
-
-    
     </script>
 
 @else
